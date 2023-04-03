@@ -23,7 +23,7 @@ class Youtube {
         // Add 'contentDetails' object to the $liveBroadcast object.
         $liveBroadcastContentDetails = new \Google_Service_YouTube_LiveBroadcastContentDetails();
         $liveBroadcastContentDetails->setEnableAutoStart(false);
-        $liveBroadcastContentDetails->setEnableAutoStop(true);
+        $liveBroadcastContentDetails->setEnableAutoStop(false);
         $liveBroadcastContentDetails->setEnableClosedCaptions(true);
         $liveBroadcastContentDetails->setEnableContentEncryption(true);
         $liveBroadcastContentDetails->setEnableDvr(true);

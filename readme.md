@@ -22,11 +22,11 @@ php -S localhost:8001 server.php
 ```bash
 php login.php
 ```
-7. List streams and find needed stream_id:
+7. List streams and find needed stream_id and update .env file with it
 ```bash
 php streams.php
 ``` 
-7. Run application using stream_id from previous step and use integer - the duration of your broadcast: 
+8. Run application with parameter "minutes_length" of your broadcast: 
 ```bash
-php index.php stream_id minutes_length
+php index.php minutes_length
 ```

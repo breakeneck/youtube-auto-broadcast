@@ -14,13 +14,13 @@ class Scenario
         $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
-    public function startBroadcast($streamId, $length)
+    public function startBroadcast($length)
     {
         $startTime = date('Y-m-d\TH:i:s\Z');
         $endTime = date('Y-m-d\TH:i:s\Z', strtotime("+ $length minutes"));
         $broadcastId = $this->youtube->createBroadcast('Test broadcast', $startTime, $endTime, $_ENV['YOUTUBE_PRIVACY']);
 
-        $this->youtube->bindToStream($broadcastId, $streamId);
+        $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 
         $this->youtube->goLive($broadcastId);
 
