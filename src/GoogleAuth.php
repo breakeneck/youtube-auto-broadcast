@@ -7,9 +7,11 @@ class Token {
     public $data;
     public function __construct()
     {
-        $content = file_get_contents(self::AUTH_FILENAME);
-        if ($content) {
-            $this->data = json_decode($content, true)['data'];
+        if (file_exists(self::AUTH_FILENAME)) {
+            $content = file_get_contents(self::AUTH_FILENAME);
+            if ($content) {
+                $this->data = json_decode($content, true)['data'];
+            }
         }
     }
 
