@@ -45,7 +45,7 @@ class GoogleAuth {
             'https://www.googleapis.com/auth/youtube',
             'https://www.googleapis.com/auth/youtube.force-ssl',
         ]);
-        $client->setAuthConfig(self::CLIENT_SECRET_FILE);
+        $client->setAuthConfig($_ENV['YOUTUBE_AUTH_FILE']);
         $client->setAccessType('offline');
         $client->setRedirectUri(self::REDIRECT_URL);
         return $client;
