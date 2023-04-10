@@ -9,10 +9,10 @@ namespace App;
 class Youtube {
     private \Google_Service_YouTube $service;
     private bool $isDebug;
-    public function __construct($isDebug = false)
+    public function __construct($authFilePath, $isDebug = false)
     {
         $this->isDebug = $isDebug;
-        $this->service = new \Google_Service_YouTube((new GoogleAuth(false))->getClient());
+        $this->service = new \Google_Service_YouTube((new GoogleAuth($authFilePath,false))->getClient());
     }
 
     public function createBroadcast($title, $startTime, $endTime, $privacy = 'public'): string

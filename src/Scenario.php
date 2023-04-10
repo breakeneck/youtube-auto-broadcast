@@ -10,7 +10,7 @@ class Scenario
     public $camera;
     public function __construct()
     {
-        $this->youtube = new \App\Youtube();
+        $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
         $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
@@ -35,7 +35,7 @@ class Scenario
     public function notify($broadcastId)
     {
         $message = "https://www.youtube.com/watch?v=$broadcastId";
-        (new \App\Telegram($_ENV['TG_API_TOKEN']))->send($_ENV['TG_CHAT_ID'], $message);
+        (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
     }
 
     public function wait($minutes)

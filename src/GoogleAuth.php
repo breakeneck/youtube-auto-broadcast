@@ -30,14 +30,14 @@ class GoogleAuth {
     private Token $token;
     private \Google_Client $client;
     private bool $allowWebAuthFlow;
-    public function __construct($allowWebAuthFlow = true)
+    public function __construct($authFilePath, $allowWebAuthFlow = true)
     {
         $this->token = new Token();
-        $this->client = $this->createClient();
+        $this->client = $this->createClient($authFilePath);
         $this->allowWebAuthFlow = $allowWebAuthFlow;
     }
 
-    private function createClient()
+    private function createClient($authFilePath)
     {
         $client = new \Google_Client();
         $client->setApplicationName('Youtube Broadcast Script');
@@ -45,7 +45,7 @@ class GoogleAuth {
             'https://www.googleapis.com/auth/youtube',
             'https://www.googleapis.com/auth/youtube.force-ssl',
         ]);
-        $client->setAuthConfig($_ENV['YOUTUBE_AUTH_FILE']);
+        $client->setAuthConfig($authFilePath);
         $client->setAccessType('offline');
         $client->setRedirectUri(self::REDIRECT_URL);
         return $client;
