@@ -26,6 +26,7 @@ php login.php
 ```bash
 php streams.php
 ``` 
+Alternatively you can use google samples:  or you can use this url https://developers.google.com/youtube/v3/live/docs/liveStreams/list?authuser=1&apix_params=%7B%22part%22%3A%5B%22snippet%2Ccdn%2CcontentDetails%2Cstatus%22%5D%2C%22mine%22%3Atrue%7D
 8. Run application with parameter "minutes_length" of your broadcast: 
 ```bash
 php index.php minutes_length
