@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace yuri;
 
 /**
  * https://developers.google.com/explorer-help/code-samples#php

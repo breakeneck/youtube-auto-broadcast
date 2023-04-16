@@ -1,8 +1,6 @@
 <?php
 
-namespace App;
-
-use Dotenv\Dotenv;
+namespace yuri;
 
 class Scenario
 {
@@ -10,8 +8,8 @@ class Scenario
     public $camera;
     public function __construct()
     {
-        $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
-        $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
+        $this->youtube = new \yuri\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
+        $this->camera = new \yuri\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
     public function startBroadcast($length)
@@ -35,7 +33,7 @@ class Scenario
     public function notify($broadcastId)
     {
         $message = "https://www.youtube.com/watch?v=$broadcastId";
-        (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
+        (new \yuri\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
     }
 
     public function wait($minutes)
