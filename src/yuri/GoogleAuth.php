@@ -1,6 +1,6 @@
 <?php
 
-namespace yuri;
+namespace App;
 
 class Token {
     const AUTH_FILENAME = './auth.json';

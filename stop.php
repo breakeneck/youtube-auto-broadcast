@@ -14,6 +14,6 @@ if (! isset($broadcastId)) {
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$scenario = new yuri\Scenario();
+$scenario = new App\Scenario();
 $scenario->finishBroadcast($broadcastId);
 $scenario->camera->zoomOut();

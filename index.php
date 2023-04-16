@@ -2,20 +2,49 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-list($scriptName, $length) = $argv;
-
-if (! isset($length)) {
-    echo "Length of your broadcast not set. Will be used 5 minutes just for test\n";
-    $length = 5;
-}
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$scenario = new yuri\Scenario();
-$scenario->camera->zoomIn();
-$broadcastId = $scenario->startBroadcast($length);
-$scenario->notify($broadcastId);
-$scenario->wait($length);
-$scenario->finishBroadcast($broadcastId);
-$scenario->camera->zoomOut();
+$state = array_merge(['id' => null], (array)json_decode(file_get_contents('state.json')));
+
+app()->template->config('path', './views');
+
+
+app()->get('/', function () use ($state) {
+    echo app()->template->render('index', [
+        'state' => $state
+    ]);
+});
+
+
+app()->get('/start', function () use ($state) {
+
+    $scenario = new App\Scenario();
+    $scenario->camera->zoomIn();
+    $broadcastId = $scenario->startBroadcast(120);
+    $scenario->notify($broadcastId);
+
+    $state['id'] = $broadcastId;
+    file_put_contents('state.json', $state);
+
+    echo app()->template->render('index', [
+        'state' => $state
+    ]);
+});
+
+app()->get('/stop', function () use ($state) {
+    $broadcastId = $state['id'];
+
+    $scenario = new App\Scenario();
+    $scenario->finishBroadcast($broadcastId);
+    $scenario->camera->zoomOut();
+
+    $state['id'] = null;
+    file_put_contents('state.json', $state);
+
+    echo app()->template->render('index', [
+        'state' => $state
+    ]);
+});
+
+app()->run();

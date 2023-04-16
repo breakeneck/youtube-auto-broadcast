@@ -1,6 +1,6 @@
 <?php
 
-namespace yuri;
+namespace App;
 
 use Breakeneck\Http\Request;
 

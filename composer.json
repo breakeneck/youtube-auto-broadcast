@@ -2,7 +2,9 @@
     "require": {
         "google/apiclient": "^2.0",
         "breakeneck/http": "^1.0",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "leafs/leaf": "^3.3",
+        "leafs/bareui": "^1.1"
     },
     "autoload": {
         "psr-4": {
