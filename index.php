@@ -19,13 +19,15 @@ app()->get('/', function () use ($state) {
 
 app()->get('/start', function () use ($state) {
 
-    $scenario = new App\Scenario();
-    $scenario->camera->zoomIn();
-    $broadcastId = $scenario->startBroadcast(120);
-    $scenario->notify($broadcastId);
+    if (!$state['id'] ) {
+        $scenario = new App\Scenario();
+        $scenario->camera->zoomIn();
+        echo $broadcastId = $scenario->startBroadcast(120);
+        $scenario->notify($broadcastId);
 
-    $state['id'] = $broadcastId;
-    file_put_contents('state.json', $state);
+        $state['id'] = $broadcastId;
+        file_put_contents('state.json', $state);
+    }
 
     echo app()->template->render('index', [
         'state' => $state
