@@ -1,0 +1,2 @@
+sudo -u http git fetch origin master
+sudo -u git reset --hard origin/master
