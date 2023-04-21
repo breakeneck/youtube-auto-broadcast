@@ -33,7 +33,7 @@ class Scenario
     public function notify($broadcastId)
     {
         $message = "https://www.youtube.com/watch?v=$broadcastId";
-        (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
+        (new \backend\src\yuri\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
     }
 
     public function wait($minutes)
