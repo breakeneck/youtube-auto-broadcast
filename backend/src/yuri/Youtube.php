@@ -49,7 +49,7 @@ class Youtube {
 
         $response = $this->service->liveBroadcasts->insert('snippet,contentDetails,status', $liveBroadcast);
 
-        print("createBroadcast\n");
+//        print("createBroadcast\n");
         if ($this->isDebug) {
             print_r($response);
         }
@@ -65,7 +65,7 @@ class Youtube {
 
         $response = $this->service->liveBroadcasts->bind($broadcastId, 'id', $queryParams);
 
-        print("bindToStream\n");
+//        print("bindToStream\n");
 
         if ($this->isDebug) {
             print_r($response);
@@ -77,7 +77,7 @@ class Youtube {
     public function goLive($broadcastId)
     {
         $response = $this->service->liveBroadcasts->transition('live', $broadcastId, 'snippet,status');
-        print("GoLive\n");
+//        print("GoLive\n");
 
         if ($this->isDebug) {
             print_r($response);
@@ -87,7 +87,7 @@ class Youtube {
     public function finish($broadcastId)
     {
         $response = $this->service->liveBroadcasts->transition('complete', $broadcastId, 'snippet,status');
-        print("Finish\n");
+//        print("Finish\n");
 
         if ($this->isDebug) {
             print_r($response);
@@ -97,7 +97,7 @@ class Youtube {
     public function listStreams()
     {
         $response = $this->service->liveStreams->listLiveStreams('cdn,status', ['mine' => true]);
-        print("Streams:\n");
+//        print("Streams:\n");
 
         if ($this->isDebug) {
             print_r($response);

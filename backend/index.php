@@ -5,9 +5,9 @@ require_once __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$state = array_merge(['id' => null], (array)json_decode(file_get_contents('state.json')));
+$state = new \App\SimpleState();
 
-app()->template->config('path', './views');
+app()->template->config('path', __DIR__ . '/views');
 
 
 app()->get('/', function () use ($state) {
@@ -17,36 +17,30 @@ app()->get('/', function () use ($state) {
 });
 
 
-app()->get('/start', function () use ($state) {
+app()->post('/start', function () use ($state) {
 
-    if (!$state['id'] ) {
+    if (!$state->getAttr('id') ) {
         $scenario = new App\Scenario();
         $scenario->camera->zoomIn();
-        echo $broadcastId = $scenario->startBroadcast(120);
+        $broadcastId = $scenario->startBroadcast($_POST['title'], 120);
         $scenario->notify($broadcastId);
 
-        $state['id'] = $broadcastId;
-        file_put_contents('state.json', $state);
+        $state->setAttr('id', $broadcastId);
     }
 
-    echo app()->template->render('index', [
-        'state' => $state
-    ]);
+    app()->response()->redirect('/');
 });
 
-app()->get('/stop', function () use ($state) {
-    $broadcastId = $state['id'];
+app()->post('/stop', function () use ($state) {
+    $broadcastId = $state->getAttr('id');
 
     $scenario = new App\Scenario();
     $scenario->finishBroadcast($broadcastId);
     $scenario->camera->zoomOut();
 
-    $state['id'] = null;
-    file_put_contents('state.json', $state);
+    $state->setAttr('id', null);
 
-    echo app()->template->render('index', [
-        'state' => $state
-    ]);
+    app()->response()->redirect('/');
 });
 
 app()->run();

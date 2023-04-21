@@ -14,7 +14,7 @@ $dotenv->load();
 
 $scenario = new App\Scenario();
 $scenario->camera->zoomIn();
-$broadcastId = $scenario->startBroadcast($length);
+$broadcastId = $scenario->startBroadcast('Title', $length);
 $scenario->notify($broadcastId);
 $scenario->wait($length);
 $scenario->finishBroadcast($broadcastId);

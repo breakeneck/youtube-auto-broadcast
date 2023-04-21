@@ -3,7 +3,7 @@
 namespace App;
 
 class Token {
-    const AUTH_FILENAME = './auth.json';
+    const AUTH_FILENAME = __DIR__ . '/../../data/auth.json';
     public $data;
     public function __construct()
     {

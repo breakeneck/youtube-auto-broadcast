@@ -23,7 +23,7 @@ class Hikvision
             ->baseAuth($this->username, $this->password)
             ->send('/ISAPI/System/status');
 
-        print_r($response->content);
+//        print_r($response->content);
     }
 
     public function zoomIn()

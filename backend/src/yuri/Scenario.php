@@ -12,11 +12,11 @@ class Scenario
         $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
-    public function startBroadcast($minutes)
+    public function startBroadcast($title, $minutes)
     {
         $startTime = date('Y-m-d\TH:i:s\Z');
         $endTime = date('Y-m-d\TH:i:s\Z', strtotime("+ $minutes minutes"));
-        $broadcastId = $this->youtube->createBroadcast('Test broadcast', $startTime, $endTime, $_ENV['YOUTUBE_PRIVACY']);
+        $broadcastId = $this->youtube->createBroadcast($title, $startTime, $endTime, $_ENV['YOUTUBE_PRIVACY']);
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 
@@ -33,7 +33,7 @@ class Scenario
     public function notify($broadcastId)
     {
         $message = "https://www.youtube.com/watch?v=$broadcastId";
-        (new \backend\src\yuri\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
+        (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
     }
 
     public function wait($minutes)
