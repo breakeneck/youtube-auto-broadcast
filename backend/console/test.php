@@ -1,8 +1,9 @@
 <?php
 
-require_once __DIR__ . './../vendor/autoload.php';
+$basedir = __DIR__ . '/../..';
+require_once $basedir . '/vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv\Dotenv::createImmutable($basedir);
 $dotenv->load();
 
 //$response = (new App\Telegram($_ENV['TG_API_TOKEN']))->updates();
