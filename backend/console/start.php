@@ -12,7 +12,7 @@ if (! isset($length)) {
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$scenario = new App\Scenario();
+$scenario = new \App\Scenario();
 $scenario->camera->zoomIn();
 $broadcastId = $scenario->startBroadcast('Title', $length);
 $scenario->notify($broadcastId);
