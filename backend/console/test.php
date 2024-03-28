@@ -1,6 +1,6 @@
 <?php
 
-$basedir = __DIR__ . '/../..';
+$basedir = __DIR__ . '/..';
 require_once $basedir . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable($basedir);
