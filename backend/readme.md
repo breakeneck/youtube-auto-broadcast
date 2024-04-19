@@ -31,3 +31,21 @@ Alternatively you can use google samples:  or you can use this url https://devel
 ```bash
 php index.php minutes_length
 ```
+
+9. Start OBS:
+```bash
+[Unit]
+Description=example systemd service unit file.
+PartOf=graphical-session.target
+
+[Service]
+Type=exec
+Restart=no
+ExecStart=obs --startstreaming --disable-shutdown-check
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical-session.target
+```
+
+and `pkill obs` for stop service, which should be placed at `~/.config/systemd/user` and can be run with systemctl --user start
