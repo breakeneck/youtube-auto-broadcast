@@ -22,6 +22,7 @@ app()->post('/start', function () use ($state) {
     if (!$state->getAttr('id') ) {
         $scenario = new App\Scenario();
         $scenario->camera->zoomIn();
+        $scenario->startObs();
         $broadcastId = $scenario->startBroadcast($_POST['title'], 120);
         $scenario->notify($broadcastId);
 
@@ -36,6 +37,7 @@ app()->post('/stop', function () use ($state) {
 
     $scenario = new App\Scenario();
     $scenario->finishBroadcast($broadcastId);
+    $scenario->stopObs();
     $scenario->camera->zoomOut();
 
     $state->setAttr('id', null);
