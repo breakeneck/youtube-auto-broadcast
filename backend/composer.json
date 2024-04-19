@@ -4,7 +4,8 @@
         "breakeneck/http": "^1.0",
         "vlucas/phpdotenv": "^5.5",
         "leafs/leaf": "^3.3",
-        "leafs/bareui": "^1.1"
+        "leafs/bareui": "^1.1",
+        "phpseclib/phpseclib": "^3.0"
     },
     "autoload": {
         "psr-4": {
