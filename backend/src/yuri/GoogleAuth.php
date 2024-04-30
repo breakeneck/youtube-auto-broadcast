@@ -2,6 +2,8 @@
 
 namespace App;
 
+defined('STDIN') || define('STDIN',fopen("php://stdin","r"));
+
 class Token {
     const AUTH_FILENAME = __DIR__ . '/../../data/auth.json';
     public $data;
