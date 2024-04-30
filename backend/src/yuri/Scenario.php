@@ -11,8 +11,8 @@ class Scenario
     public $obsPid;
     public function __construct()
     {
-//        $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
-//        $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
+        $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
+        $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
     public function startBroadcast($title, $minutes)

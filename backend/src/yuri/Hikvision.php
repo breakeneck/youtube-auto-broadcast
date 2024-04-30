@@ -16,12 +16,13 @@ class Hikvision
         $this->password = $password;
     }
 
-    public function execute($method, $url, $data)
+    public function execute($method, $url, $data = [])
     {
         $response = (new Request())
             ->xml()
             ->baseAuth($this->username, $this->password)
-            ->send('/ISAPI/System/status');
+            ->setMethod($method)
+            ->send($this->host . $url, $data);
 
 //        print_r($response->content);
     }
