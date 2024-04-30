@@ -12,7 +12,7 @@ class Youtube {
     public function __construct($authFilePath, $isDebug = false)
     {
         $this->isDebug = $isDebug;
-        $this->service = new \Google_Service_YouTube((new GoogleAuth($authFilePath,false))->getClient());
+        $this->service = new \Google_Service_YouTube((new GoogleAuth($authFilePath))->getClient());
     }
 
     public function createBroadcast($title, $startTime, $endTime, $privacy = 'public'): string
