@@ -83,7 +83,7 @@ class GoogleAuth {
         printf("Run local server with \nphp -S %s server.php\n", self::REDIRECT_URL);
         printf("Open this link in your browser:\n%s\n", $this->client->createAuthUrl());
         print('Enter verification code: ');
-        $authCode = trim(fgets(STDIN));
+        $authCode = trim(fgets(\STDIN));
 
         return $this->client->fetchAccessTokenWithAuthCode($authCode);
     }
