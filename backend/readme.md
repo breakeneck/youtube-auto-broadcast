@@ -16,7 +16,7 @@ composer install
 4. Download json auth file and fill in `.env.example` and rename it to `.env` with your auth data
 5. Run Local server on machine, you will use for web auth:
 ```bash
-php -S localhost:8001 server.php
+php -S localhost:8001 router.php
 ```
 6. Login on google and follow instructions:
 ```bash
