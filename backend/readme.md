@@ -19,6 +19,8 @@ composer install
 php -S localhost:8001 router.php
 ```
 6. Login on google and follow instructions:
+
+**If you already made a login to Google** from selected browser, then you will not receive new refresh_token. To logout, please, delete old auth here https://myaccount.google.com/connections?filters=3,4&hl=en and try again
 ```bash
 php login.php
 ```

@@ -27,15 +27,13 @@ class GoogleAuth {
     const REDIRECT_URL = 'http://localhost:8001';
 
     // Create Client Secret here: https://console.cloud.google.com/apis/credentials/oauthclient
-    const CLIENT_SECRET_FILE = __DIR__ . '/../secret.json';
-
     private Token $token;
     private \Google_Client $client;
     private bool $allowWebAuthFlow;
-    public function __construct($authFilePath, $allowWebAuthFlow = true)
+    public function __construct($clientSecretFilePath, $allowWebAuthFlow = true)
     {
         $this->token = new Token();
-        $this->client = $this->createClient($authFilePath);
+        $this->client = $this->createClient($clientSecretFilePath);
         $this->allowWebAuthFlow = $allowWebAuthFlow;
     }
 
