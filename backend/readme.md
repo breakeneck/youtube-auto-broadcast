@@ -51,3 +51,8 @@ WantedBy=graphical-session.target
 ```
 
 and `pkill obs` for stop service, which should be placed at `~/.config/systemd/user` and can be run with systemctl --user start
+
+10. Bonus. Make a snapshot using onvif
+```bash
+curl --digest -u username:password http://lutsktemple.duckdns.org:8081/ISAPI/Streaming/channels/101/picture > snapshot.jpg
+```
