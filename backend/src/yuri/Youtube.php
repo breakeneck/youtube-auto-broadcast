@@ -107,7 +107,15 @@ class Youtube {
             $cdn = $item->getCdn();
             $ingestionInfo = $cdn->getIngestionInfo();
             $status = $item->getStatus();
-            echo "$n) $item->id [$status->streamStatus] $ingestionInfo->ingestionAddress/$ingestionInfo->streamName\n";
+//            $title = $item->getSnippet()->title;
+            echo "$n) $item->id [$status->streamStatus] $ingestionInfo->ingestionAddress/$ingestionInfo->streamName ||\n";
         }
+    }
+
+    public function createStream()
+    {
+        $liveStream = new \Google_Service_YouTube_LiveStream();
+        $response = $this->service->liveStreams->insert('', $liveStream);
+        print_r($response);
     }
 }
