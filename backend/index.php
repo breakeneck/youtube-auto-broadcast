@@ -41,18 +41,22 @@ app()->get('/', function () use ($state) {
     $range = "$sheetId!A:E"; // Adjust range based on your sheet data
 
     $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-    $values = $response->getValues();
+    $rows = $response->getValues();
+//    print_r($rows);
+    $n = 0;
+    foreach ($rows as $row) {
+        if ($row[0] == date('d.m.Y')) {
+            $n = 1;
+        }
+        if ($n && $row[1] === 'нд') {
+            break;
+        }
+        if ($n) {
+            $lastRows[] = $row;
+        }
+    }
 
-    $lastRows = array_slice($values, -10); // Get last 10 rows
-
-// Process the last 10 rows here (e.g., print or store in a variable)
-
-//    echo "Retrieved last 10 rows:\n";
-//    foreach ($lastRows as $row) {
-//        echo "<pre>";
-//        echo implode(",", $row) . "\n";
-//        echo "</pre>";
-//    }
+//    $lastRows = array_slice($rows, -10); // Get last 10 rows
 
     echo app()->template->render('index', [
         'state' => $state,
