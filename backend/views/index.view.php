@@ -33,7 +33,9 @@
 </style>
 
 <?php if ($state->getAttr('id')):?>
-
+    <br/>
+    <br/>
+    <br/>
     <form method="post" action="/stop">
         <a class="icon-link" href="https://www.youtube.com/watch?v=<?=$state->getAttr('id')?>">
             <i class="bi bi-youtube"></i>
