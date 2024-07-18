@@ -16,16 +16,16 @@ app()->get('/', function () use ($state) {
 
 // Replace with your downloaded JSON credentials file path
 //    putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/data/youtubebroadcastersheets-4974f2784de2.json');
-    $credentialsPath = __DIR__ . '/data/youtubebroadcastersheets-4974f2784de2.json';
+//    $credentialsPath = __DIR__ . '/data/youtubebroadcastersheets-4974f2784de2.json';
 
-    $spreadsheetId = '1ai7ze0rTnOR6wAOkSl3Lc8x0v-M1cO_qJfE7Bvv3C5I'; // Replace with your spreadsheet ID
+//    $spreadsheetId = '1ai7ze0rTnOR6wAOkSl3Lc8x0v-M1cO_qJfE7Bvv3C5I'; // Replace with your spreadsheet ID
 //    $sheetId = '219376182';
-    $sheetId = 'SB';
+//    $sheetId = 'SB';
 
     $client = new Google\Client();
     $client->setApplicationName('My PHP Script');
     $client->setScopes(['https://www.googleapis.com/auth/spreadsheets.readonly']);
-    $client->setAuthConfig($credentialsPath); // Load credentials
+    $client->setAuthConfig($_ENV['SHEETS_CREDENTIALS']); // Load credentials
 
     $service = new Google\Service\Sheets($client);
 //    $response = $service->spreadsheets->get($spreadsheetId); // Get spreadsheet info
@@ -38,9 +38,9 @@ app()->get('/', function () use ($state) {
 //    echo "Available sheets:\n";
 //    echo implode(", ", $sheets) . "\n";
 
-    $range = "$sheetId!A:E"; // Adjust range based on your sheet data
+    $range = $_ENV['SHEET_ID'] . "!A:E"; // Adjust range based on your sheet data
 
-    $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+    $response = $service->spreadsheets_values->get($_ENV['SPREADSHEET_ID'], $range);
     $rows = $response->getValues();
 //    print_r($rows);
     $n = 0;
