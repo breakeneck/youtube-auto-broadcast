@@ -27,7 +27,7 @@ app()->post('/start', function () use ($state) {
 //        $scenario->startObs();
         $broadcastId = $scenario->startBroadcast($_POST['title'], 120);
         echo $broadcastId;
-//        $scenario->notify($broadcastId);
+        $scenario->notify($broadcastId);
 
         $state->setAttr('id', $broadcastId);
     }
