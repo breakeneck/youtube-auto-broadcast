@@ -30,6 +30,7 @@
     td {padding: 5px 10px;}
     input {width: 100%;}
     button {float: right;}
+    /*.spinner-border {display: none;}*/
 </style>
 
 <?php if ($state->getAttr('id')):?>
@@ -41,7 +42,10 @@
             <i class="bi bi-youtube"></i>
             Youtube
         </a>
-        <button type="submit" class="btn btn-primary">Завершити трансляцію</button>
+        <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+            Завершити трансляцію
+        </button>
     </form>
 <?php else: ?>
 
@@ -56,7 +60,10 @@
                 <?php if (strlen($row[4]) > 5):?>
                 <td>
 <!--                    <a href="#" onclick="document.getElementById('input').value = '<?php //=$row['4'] ?? 'empty'?>//'; return false;"> Start </a>-->
-                    <button type="button" class="go btn btn-success" ref="<?=$row[4]?>">Go</button>
+                    <button type="button" class="go btn btn-success" ref="<?=$row[4]?>">
+                        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                        Go
+                    </button>
                 </td>
                 <?php endif ?>
             <?php endif ?>
@@ -67,7 +74,10 @@
     <br/>
     <input class="form-control" id="input" name="title" type="text">
     <br/>
-    <button type="submit" class="btn btn-primary">Почати трансляцію</button>
+    <button type="submit" class="btn btn-primary">
+        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+        Почати трансляцію
+    </button>
 </form>
 
 <?php endif; ?>
@@ -75,6 +85,11 @@
     $(document).on('click', '.go', function () {
         $('#input').val($(this).attr('ref'));
         $('#form').submit();
+    })
+    $('form').submit(() => {
+        $('button').prop('disabled', true);
+        $('.spinner-border').removeClass('visually-hidden');
+        return true;
     })
 </script>
 </body>
