@@ -28,9 +28,11 @@
     /*    border-collapse: collapse;*/
     /*}*/
     td {padding: 5px 10px;}
-    input {width: 100%;}
-    button {float: right;}
+    /*input {width: 100%;}*/
+    /*.btn-primary {float: right;}*/
     /*.spinner-border {display: none;}*/
+    .flex {display: flex;}
+    .flex input {flex: 1;}
 </style>
 
 <?php if ($state->getAttr('id')):?>
@@ -72,12 +74,13 @@
     </table>
     <form id="form" method="post" action="/start">
     <br/>
-    <input class="form-control" id="input" name="title" type="text">
-    <br/>
-    <button type="submit" class="btn btn-primary">
-        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-        Почати трансляцію
-    </button>
+    <div class="flex">
+        <input class="form-control" id="input" name="title" type="text">
+        <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+            Go
+        </button>
+    </div>
 </form>
 
 <?php endif; ?>
