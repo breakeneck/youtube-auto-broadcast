@@ -2,6 +2,10 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+//$result = setlocale(LC_ALL, 'uk_UA.utf8');
+Locale::setDefault('uk_UA'); // true
+//print_r($result);
+
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -42,19 +46,29 @@ app()->get('/', function () use ($state) {
 
     $response = $service->spreadsheets_values->get($_ENV['SPREADSHEET_ID'], $range);
     $rows = $response->getValues();
+    echo "Сьогодні ". date('l d.m.Y') . "\n";
 //    print_r($rows);
     $n = 0;
     foreach ($rows as $row) {
         if ($row[0] == date('d.m.Y')) {
             $n = 1;
         }
-        if ($n && $row[1] === 'нд') {
-            break;
-        }
-        if ($n) {
+//        if ($n && $row[1] === 'нд') {
+//            echo "Exiting, because sunday\n";
+//            break;
+//        }
+        if ($n && isset($row[2]) && $row[2]) {
+            $n++;
             $lastRows[] = $row;
         }
+
+        if ($n > 7) {
+//            echo "Exiting, because 7 days\n";
+            break;
+        }
     }
+
+//    print_r($lastRows);
 
 //    $lastRows = array_slice($rows, -10); // Get last 10 rows
 
