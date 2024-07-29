@@ -2,8 +2,15 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+//setlocale(LC_ALL, 'uk_UA.utf-8'); // true
+//echo strftime("%b $dayOfMonth %a %y");
+
+
+
+// format the date according to your preferences
+// the 3 params are [ DateTime object, ICU date scheme, string locale ]
 //$result = setlocale(LC_ALL, 'uk_UA.utf8');
-Locale::setDefault('uk_UA'); // true
+//Locale::setDefault('uk_UA'); // true
 //print_r($result);
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -46,7 +53,10 @@ app()->get('/', function () use ($state) {
 
     $response = $service->spreadsheets_values->get($_ENV['SPREADSHEET_ID'], $range);
     $rows = $response->getValues();
-    echo "Сьогодні ". date('l d.m.Y') . "\n";
+
+    $dateTimeObj = new DateTime('now', new DateTimeZone('Europe/Kiev'));
+    $formatted = IntlDateFormatter::formatObject($dateTimeObj,'EEEE dd.MM.Y','uk');
+    echo "Сьогодні $formatted\n";
 //    print_r($rows);
     $n = 0;
     foreach ($rows as $row) {
