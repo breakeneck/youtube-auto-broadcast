@@ -60,7 +60,7 @@ app()->get('/', function () use ($state) {
 
     echo app()->template->render('index', [
         'state' => $state,
-        'lastRows' => $lastRows,
+        'lastRows' => $lastRows ?? [],
     ]);
 });
 
