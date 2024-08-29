@@ -95,6 +95,7 @@ app()->post('/start', function () use ($state) {
         $scenario = new App\Scenario();
 //        $scenario->camera->zoomIn();
         $scenario->startObs();
+        $scenario->wait(5);
         $broadcastId = $scenario->startBroadcast($_POST['title'], 120);
         echo $broadcastId;
         $scenario->notify($broadcastId);

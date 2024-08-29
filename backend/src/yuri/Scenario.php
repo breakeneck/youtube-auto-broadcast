@@ -39,10 +39,10 @@ class Scenario
         (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message);
     }
 
-    public function wait($minutes)
-    {
-        sleep($minutes * 60);
-    }
+//    public function wait($minutes)
+//    {
+//        sleep($minutes * 60);
+//    }
 
     public function startObs()
     {
@@ -63,5 +63,10 @@ class Scenario
             throw new \Exception('Login failed');
         }
         return $ssh;
+    }
+
+    public function wait($seconds)
+    {
+        sleep($seconds);
     }
 }
