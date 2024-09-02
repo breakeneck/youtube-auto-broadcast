@@ -63,18 +63,14 @@ app()->get('/', function () use ($state) {
         if ($row[0] == date('d.m.Y')) {
             $n = 1;
         }
-//        if ($n && $row[1] === 'нд') {
-//            echo "Exiting, because sunday\n";
-//            break;
-//        }
-        if ($n && isset($row[2]) && $row[2]) {
+        if ($n) {
             $n++;
-            $lastRows[] = $row;
-        }
-
-        if ($n > 7) {
-//            echo "Exiting, because 7 days\n";
-            break;
+            if (isset($row[2]) && $row[2]) {
+                $lastRows[] = $row;
+            }
+            if ($n > 5) {
+                break;
+            }
         }
     }
 
