@@ -59,18 +59,25 @@ app()->get('/', function () use ($state) {
     echo "Сьогодні $formatted\n";
 //    print_r($rows);
     $n = 0;
+    $prevDate = null;
     foreach ($rows as $row) {
         if ($row[0] == date('d.m.Y')) {
             $n = 1;
         }
         if ($n) {
-            $n++;
+            if ($prevDate && DateTime::createFromFormat($row[0],'d.m.Y')->format('N') < $prevDate->format('N')) {
+                break;
+            }
             if (isset($row[2]) && $row[2]) {
                 $lastRows[] = $row;
             }
-            if ($n > 5) {
+            if ($n > 7) {
                 break;
             }
+            if ($row[0]) {
+                $prevDate = DateTime::createFromFormat($row[0],'d.m.Y');
+            }
+            $n++;
         }
     }
 
