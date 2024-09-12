@@ -36,10 +36,10 @@ app()->post('/start', function () use ($state) {
             $parser = new \App\HtmlParser($url);
             $parser->parseVedabase();
 
-            $about[] = $url;
             $about[] = \App\Utils::BOOKS[$_POST['book']] . ' ' . $_POST['verse'] . "\n" . $parser->sankrit;
             $about[] = "Послівний переклад\n" . $parser->transcribe;
             $about[] = "Переклад\n" . $parser->translation;
+            $about[] = $url;
             $description = implode("\n\n", $about);
         }
         $broadcastId = $scenario->startBroadcast($title, $description ?? '');
