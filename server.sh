@@ -1,0 +1,1 @@
+php -c /etc/php/php.ini -S localhost:8080 -t ./backend

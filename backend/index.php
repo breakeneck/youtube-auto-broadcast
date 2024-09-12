@@ -29,8 +29,14 @@ app()->post('/start', function () use ($state) {
 //        $scenario->camera->zoomIn();
         $scenario->startObs();
         $scenario->wait(5);
-        $broadcastId = $scenario->startBroadcast($_POST['title'], 120);
-        echo $broadcastId;
+        $title = $_POST['title'];
+        if (isset($_POST['verse']) && isset($_POST['book'])) {
+            $verseParts = explode('.', $_POST['verse']);
+            $url = 'https://vedabase.io/ru/library/' . $_POST['book'] . '/' . implode('/', $verseParts);
+//            $page = file_get_contents($url);
+            $description = $url;
+        }
+        $broadcastId = $scenario->startBroadcast($title, $description ?? '');
         $scenario->notify($broadcastId);
 
         $state->setAttr('id', $broadcastId);

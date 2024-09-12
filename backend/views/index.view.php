@@ -1,3 +1,7 @@
+<?php /**
+* @var \App\Row[] $lastRows
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,19 +63,24 @@
         </button>
     </form>
 <?php else: ?>
-
+    <div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?></div>
     <table class="table table-striped table-hover">
         <?php foreach ($lastRows as $row):?>
         <tr>
-            <?php foreach ($row as $n => $item):?>
-            <?php if (in_array($n, [2, 3])) continue ?>
-            <td><?=$item?></td>
-            <?php endforeach; ?>
-            <?php if (isset($row[4])):?>
-                <?php if (strlen($row[4]) > 5):?>
+            <?php if (! $row->verse) continue ?>
+            <td><?=$row->dateFormatted()?></td>
+            <td><?=$row->dayOfWeek()?></td>
+            <td><?=$row->verse?></td>
+            <td><?=$row->username?></td>
+            <?php if (isset($row->title)):?>
+                <?php if (strlen($row->title) > 5):?>
                 <td>
 <!--                    <a href="#" onclick="document.getElementById('input').value = '<?php //=$row['4'] ?? 'empty'?>//'; return false;"> Start </a>-->
-                    <button type="button" class="go btn btn-success" ref="<?=$row[4]?>">
+                    <button type="button" class="go btn btn-success"
+                            data-title="<?=$row->title?>"
+                            data-verse="<?=$row->verse?>"
+                            data-book="<?=$row->book?>"
+                    >
                         <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
                         Go
                     </button>
@@ -84,7 +93,9 @@
     <form id="form" method="post" action="/start">
     <br/>
     <div class="flex">
-        <input class="form-control" id="input" name="title" type="text">
+        <input id="book" name="book" type="hidden">
+        <input id="verse" name="verse" type="hidden">
+        <input id="title" name="title" type="text">
         <button type="submit" class="btn btn-primary">
             <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
             Go
@@ -95,7 +106,10 @@
 <?php endif; ?>
 <script type="text/javascript">
     $(document).on('click', '.go', function () {
-        $('#input').val($(this).attr('ref'));
+        $('#title').val($(this).attr('data-title'));
+        $('#verse').val($(this).attr('data-verse'));
+        $('#book').val($(this).attr('data-book'));
+
         $('#form').submit();
     })
     $('form').submit(() => {
