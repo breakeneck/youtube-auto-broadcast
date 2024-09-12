@@ -36,19 +36,19 @@ app()->post('/start', function () use ($state) {
             $parser = new \App\HtmlParser($url);
             $parser->parseVedabase();
 
-            $about[] = $url .'<br/><br/>';
-            $about[] = $parser->sankrit;
-            $about[] = $parser->transcribe;
-            $about[] = $parser->translation;
-            $description = implode("\n", $about);
+            $about[] = $url . "\n\n";
+            $about[] = "ШБ " . \App\Utils::BOOKS[$_POST['book']] . "\n" . $parser->sankrit;
+            $about[] = "Послівний переклад\n" . $parser->transcribe;
+            $about[] = "Переклад\n" . $parser->translation;
+            echo $description = implode("\n\n", $about);
         }
-        $broadcastId = $scenario->startBroadcast($title, $description ?? '');
-        $scenario->notify($broadcastId);
-
-        $state->setAttr('id', $broadcastId);
+//        $broadcastId = $scenario->startBroadcast($title, $description ?? '');
+//        $scenario->notify($broadcastId);
+//
+//        $state->setAttr('id', $broadcastId);
     }
 
-    app()->response()->redirect('/');
+//    app()->response()->redirect('/');
 });
 
 app()->post('/stop', function () use ($state) {

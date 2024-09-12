@@ -4,6 +4,12 @@ namespace App;
 
 class Utils
 {
+    const BOOKS = [
+        'sb' => 'ШБ',
+        'bg' => 'БГ',
+        'cc' => 'ЧЧ',
+    ];
+
     /**
      * REFERENCE - https://unicode-org.github.io/icu/userguide/format_parse/datetime/#datetime-format-syntax
      * @param $date

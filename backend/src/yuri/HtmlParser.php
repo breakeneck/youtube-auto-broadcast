@@ -18,8 +18,10 @@ class HtmlParser
 
     public function parseVedabase()
     {
-        $this->sankrit = $this->crawler->filter('.wrapper-verse-text i')->html();
-        $this->transcribe = $this->crawler->filter('.wrapper-synonyms .r-synonyms')->html();
-        $this->translation = $this->crawler->filter('.wrapper-translation .r-translation')->html();
+        $rawSankrit = $this->crawler->filter('.wrapper-verse-text i')->html();
+        $this->transcribe = $this->crawler->filter('.wrapper-synonyms .r-synonyms')->text();
+        $this->translation = $this->crawler->filter('.wrapper-translation .r-translation')->text();
+
+        $this->sankrit = str_replace(['<br>', '<br />'], ["\n", "\n"], $rawSankrit);
     }
 }
