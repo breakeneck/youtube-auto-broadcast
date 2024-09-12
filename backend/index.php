@@ -2,17 +2,6 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-//setlocale(LC_ALL, 'uk_UA.utf-8'); // true
-//echo strftime("%b $dayOfMonth %a %y");
-
-
-
-// format the date according to your preferences
-// the 3 params are [ DateTime object, ICU date scheme, string locale ]
-//$result = setlocale(LC_ALL, 'uk_UA.utf8');
-//Locale::setDefault('uk_UA'); // true
-//print_r($result);
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -24,7 +13,7 @@ app()->config(['debug' => $_ENV['APP_DEBUG']]);
 
 
 app()->get('/', function () use ($state) {
-    $lastRows = getLastRowsFromExcelFile();
+    $lastRows = \App\GoogleSheet::getRowsAfterToday();
 
     echo app()->template->render('index', [
         'state' => $state,
@@ -64,52 +53,3 @@ app()->post('/stop', function () use ($state) {
 });
 
 app()->run();
-
-
-function getLastRowsFromExcelFile()
-{
-    $lastRows = [];
-    try {
-        $client = new Google\Client();
-        $client->setApplicationName('My PHP Script');
-        $client->setScopes(['https://www.googleapis.com/auth/spreadsheets.readonly']);
-        $client->setAuthConfig($_ENV['SHEETS_CREDENTIALS']); // Load credentials
-
-        $service = new Google\Service\Sheets($client);
-        $range = $_ENV['SHEET_ID'] . "!A:E"; // Adjust range based on your sheet data
-
-        $response = $service->spreadsheets_values->get($_ENV['SPREADSHEET_ID'], $range);
-        $rows = $response->getValues();
-
-        $dateTimeObj = new DateTime('now', new DateTimeZone('Europe/Kiev'));
-        $formatted = IntlDateFormatter::formatObject($dateTimeObj, 'EEEE dd.MM.Y', 'uk');
-        echo "Сьогодні $formatted\n";
-//    print_r($rows);
-        $n = 0;
-        $prevDate = null;
-        foreach ($rows as $row) {
-            if ($row[0] == date('d.m.Y')) {
-                $n = 1;
-            }
-            if ($n) {
-                if ($prevDate && DateTime::createFromFormat($row[0], 'd.m.Y')->format('N') < $prevDate->format('N')) {
-                    break;
-                }
-                if (isset($row[2]) && $row[2]) {
-                    $lastRows[] = $row;
-                }
-                if ($n > 7) {
-                    break;
-                }
-                if ($row[0]) {
-                    $prevDate = DateTime::createFromFormat($row[0], 'd.m.Y');
-                }
-                $n++;
-            }
-        }
-    }
-    catch (\Exception $exception) {
-
-    }
-    return $lastRows;
-}
