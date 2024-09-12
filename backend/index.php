@@ -33,8 +33,14 @@ app()->post('/start', function () use ($state) {
         if (isset($_POST['verse']) && isset($_POST['book'])) {
             $verseParts = explode('.', $_POST['verse']);
             $url = 'https://vedabase.io/ru/library/' . $_POST['book'] . '/' . implode('/', $verseParts);
-//            $page = file_get_contents($url);
-            $description = $url;
+            $parser = new \App\HtmlParser($url);
+            $parser->parseVedabase();
+
+            $about[] = $url .'<br/><br/>';
+            $about[] = $parser->sankrit;
+            $about[] = $parser->transcribe;
+            $about[] = $parser->translation;
+            $description = implode("\n", $about);
         }
         $broadcastId = $scenario->startBroadcast($title, $description ?? '');
         $scenario->notify($broadcastId);
