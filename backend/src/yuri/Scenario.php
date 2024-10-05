@@ -47,12 +47,14 @@ class Scenario
     public function startObs()
     {
         $ssh = $this->loginSSH();
+        $ssh->exec('vlcout');
         $ssh->exec('systemctl --user start obs-start');
     }
 
     public function stopObs()
     {
         $ssh = $this->loginSSH();
+        $ssh->exec('vlckill');
         $ssh->exec('systemctl --user start obs-stop');
     }
 
