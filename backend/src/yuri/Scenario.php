@@ -47,6 +47,7 @@ class Scenario
     public function startObs()
     {
         $ssh = $this->loginSSH();
+        $ssh->exec('DISPLAY=:0 nohup vlc &');
         $ssh->exec('systemctl --user start obs-start');
     }
 
