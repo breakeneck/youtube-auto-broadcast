@@ -4,19 +4,20 @@ namespace App;
 
 const UA_DATE_FORMAT = 'd.m.Y';
 class Row {
+    public $isManualMode;
     public $date;
     public $book;
     public $verse;
     public $username;
 //    public $title;
 
-    public function __construct($date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null)
+    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null)
     {
+        $this->isManualMode = (bool)$isManualMode;
         $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
         $this->book = $book;
         $this->verse = $verse;
         $this->username = $username;
-//        $this->title = "$book $verse - $username";
     }
 
     public function isValid()
@@ -54,7 +55,7 @@ class GoogleSheet
     static function getRowsAfterToday($count = 7)
     {
         try {
-            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:E");
+            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:F");
         } catch (\Exception $e) {
             return [];
         }

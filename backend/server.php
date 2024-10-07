@@ -9,6 +9,13 @@ $state = new \App\SimpleState();
 
 list($action) = array_slice($argv, array_search(basename(__FILE__), $argv) + 1);
 
+$decor = new \App\Decor(\App\GoogleSheet::getTodaysRow());
+echo date('Y-m-d H:i:s') . " $action: " . ($decor->row->isManualMode ? 'MANUAL_MODE' : $decor->getTitle());
+
+if($decor->row->isManualMode) {
+    return;
+}
+
 switch ($action) {
     case 'start':
         if ($state->getAttr('id') ) {
@@ -19,8 +26,6 @@ switch ($action) {
         $scenario->startObs();
         $scenario->wait(5);
 
-        $decor = new \App\Decor(\App\GoogleSheet::getTodaysRow());
-        echo $decor->getTitle();
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
         $scenario->notify($broadcastId);
 

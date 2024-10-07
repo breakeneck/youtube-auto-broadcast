@@ -15,16 +15,15 @@ class Decor
         self::BG => self::BG_UK,
         self::CC => self::CC_UK,
     ];
-    private $book = '';
-    private $verse = '';
-    private $username = '';
+    
+    public Row $row;
 
     private $title = '';
 
     public function __construct($input = null)
     {
         if ($input instanceof Row) {
-            $this->setPost((array)$input);
+            $this->row = $input;
         }
         elseif (is_array($input)) {
             $this->setPost($input);
@@ -33,13 +32,14 @@ class Decor
 
     public function setPost($post)
     {
+        $this->row = new Row();
         if (isset($post['title']) && trim($post['title']) != '') {
             $this->title = $post['title'];
         }
         else {
-            $this->book = $post['book'];
-            $this->verse = $post['verse'];
-            $this->username = $post['username'];
+            $this->row->book = $post['book'];
+            $this->row->verse = $post['verse'];
+            $this->row->username = $post['username'];
         }
     }
 
@@ -54,31 +54,31 @@ class Decor
     }
     public function getTitle()
     {
-        return $this->title ?: "$this->book $this->verse - $this->username";
+        return $this->title ?: "{$this->row->book} {$this->row->verse} - {$this->row->username}";
     }
 
     public function getDescription()
     {
         $about = [];
-        if (! trim($this->book) || ! trim($this->verse)) {
+        if (! trim($this->row->book) || ! trim($this->row->verse)) {
             return '';
         }
         try {
-            $verseParts = explode('.', $this->verse);
+            $verseParts = explode('.', $this->row->verse);
             $lang = 'ru';
-            if ($this->book == self::BG_UK || ($this->book == self::SB_UK && $verseParts[0] <= 3)) {
+            if ($this->row->book == self::BG_UK || ($this->row->book == self::SB_UK && $verseParts[0] <= 3)) {
                 $lang = 'uk';
             }
-            $url = "https://vedabase.io/$lang/library/" . self::books_en()[$this->book] . '/' . implode('/', $verseParts);
+            $url = "https://vedabase.io/$lang/library/" . self::books_en()[$this->row->book] . '/' . implode('/', $verseParts);
             $parser = new \App\HtmlParser($url);
             $parser->parseVedabase();
 
-            $about[] = $this->book . ' ' . $this->verse . "\n" . $parser->sankrit;
+            $about[] = $this->row->book . ' ' . $this->row->verse . "\n" . $parser->sankrit;
             $about[] = "Послівний переклад\n" . $parser->transcribe;
             $about[] = "Переклад\n" . $parser->translation;
             $about[] = $url;
         } catch (\Exception $e) {
-            echo "Error parsing vedabase verse & book for building description: " . $e->getMessage();
+            echo "Error parsing VedaBase verse & book for building description: " . $e->getMessage();
         }
 
         return  implode("\n\n", $about);
