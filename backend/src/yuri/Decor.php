@@ -66,7 +66,7 @@ class Decor
         try {
             $verseParts = explode('.', $this->verse);
             $lang = 'ru';
-            if ($this->book == self::BG_UK || ($this->book == self::SB_UK && $verseParts <= 3)) {
+            if ($this->book == self::BG_UK || ($this->book == self::SB_UK && $verseParts[0] <= 3)) {
                 $lang = 'uk';
             }
             $url = "https://vedabase.io/$lang/library/" . self::books_en()[$this->book] . '/' . implode('/', $verseParts);
