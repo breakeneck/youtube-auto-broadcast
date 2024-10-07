@@ -4,10 +4,16 @@ namespace App;
 
 class Decor
 {
+    const BG = 'bg';
+    const SB = 'sb';
+    const CC = 'cc';
+    const BG_UK = 'БГ';
+    const SB_UK = 'ШБ';
+    const CC_UK = 'ЧЧ';
     const BOOKS = [
-        'sb' => 'ШБ',
-        'bg' => 'БГ',
-        'cc' => 'ЧЧ',
+        self::SB => self::SB_UK,
+        self::BG => self::BG_UK,
+        self::CC => self::CC_UK,
     ];
     private $book = '';
     private $verse = '';
@@ -53,18 +59,27 @@ class Decor
 
     public function getDescription()
     {
+        $about = [];
         if (! trim($this->book) || ! trim($this->verse)) {
             return '';
         }
-        $verseParts = explode('.', $this->verse);
-        $url = 'https://vedabase.io/ru/library/' . self::books_en()[$this->book] . '/' . implode('/', $verseParts);
-        $parser = new \App\HtmlParser($url);
-        $parser->parseVedabase();
+        try {
+            $verseParts = explode('.', $this->verse);
+            $lang = 'ru';
+            if ($this->book == self::BG_UK || ($this->book == self::SB_UK && $verseParts <= 3)) {
+                $lang = 'uk';
+            }
+            $url = "https://vedabase.io/$lang/library/" . self::books_en()[$this->book] . '/' . implode('/', $verseParts);
+            $parser = new \App\HtmlParser($url);
+            $parser->parseVedabase();
 
-        $about[] = $this->book . ' ' . $this->verse . "\n" . $parser->sankrit;
-        $about[] = "Послівний переклад\n" . $parser->transcribe;
-        $about[] = "Переклад\n" . $parser->translation;
-        $about[] = $url;
+            $about[] = $this->book . ' ' . $this->verse . "\n" . $parser->sankrit;
+            $about[] = "Послівний переклад\n" . $parser->transcribe;
+            $about[] = "Переклад\n" . $parser->translation;
+            $about[] = $url;
+        } catch (\Exception $e) {
+            echo "Error parsing vedabase verse & book for building description: " . $e->getMessage();
+        }
 
         return  implode("\n\n", $about);
     }
