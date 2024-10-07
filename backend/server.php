@@ -10,7 +10,7 @@ $state = new \App\SimpleState();
 list($action) = array_slice($argv, array_search(basename(__FILE__), $argv) + 1);
 
 $decor = new \App\Decor(\App\GoogleSheet::getTodaysRow());
-echo date('Y-m-d H:i:s') . " $action: " . ($decor->row->isManualMode ? 'MANUAL_MODE' : $decor->getTitle());
+echo date('Y-m-d H:i:s') . " $action: " . ($decor->row->isManualMode ? 'MANUAL_MODE' : $decor->getTitle()) . "\n";
 
 if($decor->row->isManualMode) {
     return;
