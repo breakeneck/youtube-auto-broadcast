@@ -70,14 +70,13 @@
             <?php if (! $row->verse) continue ?>
             <td><?=$row->dateFormatted()?></td>
             <td><?=$row->dayOfWeek()?></td>
+            <td><?=$row->book?></td>
             <td><?=$row->verse?></td>
             <td><?=$row->username?></td>
-            <?php if (isset($row->title)):?>
-                <?php if (strlen($row->title) > 5):?>
+            <?php if ($row->isValid()):?>
                 <td>
-<!--                    <a href="#" onclick="document.getElementById('input').value = '<?php //=$row['4'] ?? 'empty'?>//'; return false;"> Start </a>-->
                     <button type="button" class="go btn btn-success"
-                            data-title="<?=$row->title?>"
+                            data-username="<?=$row->username?>"
                             data-verse="<?=$row->verse?>"
                             data-book="<?=$row->book?>"
                     >
@@ -85,7 +84,6 @@
                         Go
                     </button>
                 </td>
-                <?php endif ?>
             <?php endif ?>
         </tr>
         <?php endforeach; ?>
@@ -93,8 +91,16 @@
     <form id="form" method="post" action="/start">
     <br/>
     <div class="flex">
-        <input id="book" name="book" type="hidden">
-        <input id="verse" name="verse" type="hidden">
+        <select id="book" name="book" placeholder="Book">
+            <option>---</option>
+            <?php foreach (\App\Decor::booksDropDown() as $book):?>
+            <option value="<?=$book?>"> <?=$book?> </option>
+            <?php endforeach;?>
+        </select>
+        <input id="verse" name="verse" placeholder="Verse" style="min-width: 80px; flex-grow: 0">
+        <input id="username" name="username" placeholder="Username" style="flex-grow: 1">
+    </div>
+    <div class="flex">
         <input id="title" name="title" type="text">
         <button type="submit" class="btn btn-primary">
             <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
@@ -106,7 +112,7 @@
 <?php endif; ?>
 <script type="text/javascript">
     $(document).on('click', '.go', function () {
-        $('#title').val($(this).attr('data-title'));
+        $('#username').val($(this).attr('data-username'));
         $('#verse').val($(this).attr('data-verse'));
         $('#book').val($(this).attr('data-book'));
 

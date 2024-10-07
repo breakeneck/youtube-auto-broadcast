@@ -14,7 +14,7 @@ composer install
 2. Go to Google Cloud Console https://console.cloud.google.com/apis/credentials/oauthclient 
 3. Select Application type - Web Application. Add redirect url: http://localhost:8001
 4. Download json auth file and fill in `.env.example` and rename it to `.env` with your auth data
-5. Run Local server on machine, you will use for web auth:
+5. There should be only client secret in data folder (and empty state.json). Run Local server on machine, you will use for web auth:
 ```bash
 php -S localhost:8001 router.php
 ```

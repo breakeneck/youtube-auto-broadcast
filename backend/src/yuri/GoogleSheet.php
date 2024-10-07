@@ -5,18 +5,23 @@ namespace App;
 const UA_DATE_FORMAT = 'd.m.Y';
 class Row {
     public $date;
-//    public $dayOfWeek;
+    public $book;
     public $verse;
     public $username;
-    public $title;
-    public $book = 'sb';
+//    public $title;
 
-    public function __construct($date = null, $dayOfWeek = null, $verse = null, $username = null, $title = null)
+    public function __construct($date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null)
     {
         $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
+        $this->book = $book;
         $this->verse = $verse;
         $this->username = $username;
-        $this->title = $title;
+//        $this->title = "$book $verse - $username";
+    }
+
+    public function isValid()
+    {
+        return $this->book && $this->verse && $this->username;
     }
 
     function isToday(): bool
@@ -55,7 +60,6 @@ class GoogleSheet
         }
 
         $n = 0;
-        $prevRow = null;
         $lastRows = [];
 
         foreach ($rawRows as $rowArray) {
@@ -64,21 +68,22 @@ class GoogleSheet
                 $n = 1;
             }
             if ($n) {
-//                if (($prevRow && $row->isWeekTransition($prevRow)) || $n > $count) {
-                if ($n > $count) {
+                if ($n >= $count) {
                     break;
                 }
-                if ($row->verse) {
+//                if ($row->verse) {
                     $lastRows[] = $row;
-                }
-//                if ($row->date) {
-//                    $prevRow = $row;
 //                }
                 $n++;
             }
         }
 
         return $lastRows;
+    }
+
+    static function getTodaysRow()
+    {
+        return self::getRowsAfterToday(1)[0];
     }
 
     private static function fetchRows($spreadsheetId, $sheetId, $range)

@@ -29,20 +29,9 @@ app()->post('/start', function () use ($state) {
 //        $scenario->camera->zoomIn();
         $scenario->startObs();
         $scenario->wait(5);
-        $title = $_POST['title'];
-        if (isset($_POST['verse']) && isset($_POST['book'])) {
-            $verseParts = explode('.', $_POST['verse']);
-            $url = 'https://vedabase.io/ru/library/' . $_POST['book'] . '/' . implode('/', $verseParts);
-            $parser = new \App\HtmlParser($url);
-            $parser->parseVedabase();
 
-            $about[] = \App\Utils::BOOKS[$_POST['book']] . ' ' . $_POST['verse'] . "\n" . $parser->sankrit;
-            $about[] = "Послівний переклад\n" . $parser->transcribe;
-            $about[] = "Переклад\n" . $parser->translation;
-            $about[] = $url;
-            $description = implode("\n\n", $about);
-        }
-        $broadcastId = $scenario->startBroadcast($title, $description ?? '');
+        $decor = new \App\Decor($_POST);
+        $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
         $scenario->notify($broadcastId);
 
         $state->setAttr('id', $broadcastId);
