@@ -65,15 +65,14 @@ class GoogleSheet
         foreach ($rawRows as $rowArray) {
             $row = new Row(...$rowArray);
             if ($row->isToday()) {
+//                print_r($row);
                 $n = 1;
             }
             if ($n) {
-                if ($n >= $count) {
+                if ($n > $count) {
                     break;
                 }
-//                if ($row->verse) {
-                    $lastRows[] = $row;
-//                }
+                $lastRows[] = $row;
                 $n++;
             }
         }

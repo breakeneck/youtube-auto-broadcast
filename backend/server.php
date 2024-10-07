@@ -20,6 +20,7 @@ switch ($action) {
         $scenario->wait(5);
 
         $decor = new \App\Decor(\App\GoogleSheet::getTodaysRow());
+        echo $decor->getTitle();
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
         $scenario->notify($broadcastId);
 

@@ -18,16 +18,11 @@ class Decor
     public function __construct($input = null)
     {
         if ($input instanceof Row) {
-            $this->setRow($input);
+            $this->setPost((array)$input);
         }
         elseif (is_array($input)) {
             $this->setPost($input);
         }
-    }
-
-    public function setRow($row)
-    {
-
     }
 
     public function setPost($post)
