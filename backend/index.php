@@ -53,4 +53,10 @@ app()->post('/stop', function () use ($state) {
     app()->response()->redirect('/');
 });
 
+app()->post('/reset', function () use ($state) {
+    $state->setAttr('id', null);
+
+    app()->response()->redirect('/');
+});
+
 app()->run();
