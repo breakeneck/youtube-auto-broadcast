@@ -10,6 +10,12 @@ class Decor
     const BG_UK = 'БГ';
     const SB_UK = 'ШБ';
     const CC_UK = 'ЧЧ';
+
+    const CC_LILA = [
+        '1' => 'adi',
+        '2' => 'madhya',
+        '3' => 'antya'
+    ];
     const BOOKS = [
         self::SB => self::SB_UK,
         self::BG => self::BG_UK,
@@ -68,6 +74,9 @@ class Decor
             $lang = 'ru';
             if ($this->row->book == self::BG_UK || ($this->row->book == self::SB_UK && $verseParts[0] <= 3)) {
                 $lang = 'uk';
+            }
+            if ($this->row->book == self::CC_UK) {
+                $verseParts[0] = self::CC_LILA[$verseParts[0]];
             }
             $url = "https://vedabase.io/$lang/library/" . self::books_en()[$this->row->book] . '/' . implode('/', $verseParts);
             $parser = new \App\HtmlParser($url);
