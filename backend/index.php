@@ -59,4 +59,14 @@ app()->get('/reset', function () use ($state) {
     app()->response()->redirect('/');
 });
 
+app()->get('/resetcam', function () use ($state) {
+    $broadcastId = $state->getAttr('id');
+
+    if ($broadcastId) {
+        $scenario = new App\Scenario();
+        $scenario->restartCamera();
+    }
+    app()->response()->redirect('/');
+});
+
 app()->run();

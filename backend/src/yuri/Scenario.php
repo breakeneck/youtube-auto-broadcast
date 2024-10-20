@@ -60,6 +60,14 @@ class Scenario
         $ssh->exec('systemctl --user start obs-stop');
     }
 
+
+    public function restartCamera()
+    {
+        $ssh = $this->loginSSH();
+        $ssh->exec('systemctl --user restart vlc');
+    }
+
+
     private function loginSSH()
     {
         $ssh = new SSH2($_ENV['OBS_HOST'], $_ENV['OBS_PORT']);

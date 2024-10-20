@@ -62,6 +62,8 @@
             Завершити трансляцію
         </button>
     </form>
+    <br/>
+    <a href="/resetcam">Перезавантажити камеру</a>
 <?php else: ?>
     <div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?></div>
     <table class="table table-striped table-hover">
