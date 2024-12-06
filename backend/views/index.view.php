@@ -72,8 +72,12 @@
             <?php if (! $row->verse) continue ?>
             <td><?=$row->dateFormatted()?></td>
             <td><?=$row->dayOfWeek()?></td>
-            <td><?=$row->book?></td>
-            <td><?=$row->verse?></td>
+<!--            <td>--><?php //=$row->book?><!--</td>-->
+            <td>
+                <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
+                    <?=$row->verse?>
+                </a>
+            </td>
             <td><?=$row->username?></td>
             <?php if ($row->isValid()):?>
                 <td>
