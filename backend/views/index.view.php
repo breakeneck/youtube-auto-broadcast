@@ -70,12 +70,12 @@
         <?php foreach ($lastRows as $row):?>
         <tr>
             <?php if (! $row->verse) continue ?>
-            <td><?=$row->dateFormatted()?></td>
-            <td><?=$row->dayOfWeek()?></td>
+            <td><?=$row->dateTableFormat()?></td>
+<!--            <td>--><?php //=$row->dayOfWeek()?><!--</td>-->
 <!--            <td>--><?php //=$row->book?><!--</td>-->
             <td>
                 <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
-                    <?=$row->verse?>
+                    <?=$row->book .' ' . $row->verse?>
                 </a>
             </td>
             <td><?=$row->username?></td>

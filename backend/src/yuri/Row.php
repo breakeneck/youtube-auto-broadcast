@@ -3,6 +3,7 @@
 namespace App;
 
 const UA_DATE_FORMAT = 'd.m.Y';
+const TABLE_DATE_FORMAT = 'd.m';
 class Row {
     public $isManualMode;
     public $date;
@@ -41,10 +42,17 @@ class Row {
         return $this->date instanceof \DateTime ? $this->date->format(UA_DATE_FORMAT) : '';
     }
 
+    function dateTableFormat()
+    {
+        return $this->date instanceof \DateTime
+            ? Utils::getLocalTimeStr($this->date, 'EEEEEE, d MMM')
+            : '';
+    }
+
     function dayOfWeek()
     {
         if ($this->date instanceof \DateTime) {
-            return Utils::getLocalTimeStr($this->date->format('Y-m-d'), 'EEEEEE');
+            return Utils::getLocalTimeStr($this->date, 'EEEEEE');
         }
         return '';
     }

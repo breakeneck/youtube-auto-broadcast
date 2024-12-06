@@ -35,6 +35,7 @@ class Utils
      */
     static function getLocalTimeStr($date, $format)
     {
+        $date = $date instanceof \DateTime ? $date->format('Y-m-d') : $date;
         $dateTimeObj = new \DateTime($date, new \DateTimeZone('Europe/Kiev'));
         return \IntlDateFormatter::formatObject($dateTimeObj, $format, 'uk');
     }
