@@ -28,7 +28,7 @@ app()->post('/start', function () use ($state) {
         $scenario = new App\Scenario();
 //        $scenario->camera->zoomIn();
         $scenario->startObs();
-        $scenario->wait(5);
+        $scenario->wait(10);
 
         $decor = new \App\Decor($_POST);
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
@@ -66,6 +66,13 @@ app()->get('/resetcam', function () use ($state) {
         $scenario = new App\Scenario();
         $scenario->restartCamera();
     }
+    app()->response()->redirect('/');
+});
+
+app()->get('/exitapps', function () use ($state) {
+    $scenario = new App\Scenario();
+    $scenario->stopObs();
+
     app()->response()->redirect('/');
 });
 
