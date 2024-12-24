@@ -23,7 +23,15 @@ class Scenario
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 
-        $this->youtube->goLive($broadcastId);
+        try {
+            $this->youtube->goLive($broadcastId);
+        }
+        catch (\Exception $e) {
+            var_dump($e->getMessage());
+//            if ($e->getMessage() === 'Stream is inactive') {
+//
+//            }
+        }
 
         return $broadcastId;
     }
