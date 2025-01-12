@@ -24,7 +24,7 @@ switch ($action) {
 
         $scenario = new App\Scenario();
         $scenario->startObs();
-        $scenario->wait(5);
+        $scenario->wait(10);
 
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
         $scenario->notify($broadcastId);
