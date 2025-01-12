@@ -66,7 +66,7 @@
     <a href="/resetcam">Перезавантажити камеру</a>
 <?php else: ?>
     <div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?>
-        &nbsp;&nbsp;<input type="checkbox" name="not_notify"/>&nbsp;Don't notify
+        &nbsp;&nbsp;<input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
     </div>
     <table class="table table-striped table-hover">
         <?php foreach ($lastRows as $row):?>

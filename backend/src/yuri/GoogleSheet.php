@@ -55,7 +55,7 @@ class GoogleSheet
     static function getRowsAfterToday($count = 7)
     {
         try {
-            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:F");
+            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:G");
         } catch (\Exception $e) {
             return [];
         }

@@ -60,7 +60,7 @@ class Decor
     }
     public function getTitle()
     {
-        return $this->title ?: "{$this->row->book} {$this->row->verse} - {$this->row->username}";
+        return $this->title ?: "{$this->row->book} {$this->row->verse} - {$this->row->username}" . ($this->row->theme ? " - {$this->row->theme}" : '');
     }
 
     public function getDescription()

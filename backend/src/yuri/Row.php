@@ -10,15 +10,16 @@ class Row {
     public $book;
     public $verse;
     public $username;
+    public $theme;
 //    public $title;
 
-    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null)
+    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null, $theme = null)
     {
         $this->isManualMode = (bool)$isManualMode;
         $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
         $this->book = $book;
         $this->verse = $verse;
-        $this->username = $username;
+        $this->theme = $theme;
     }
 
     public function isValid()

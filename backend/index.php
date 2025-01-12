@@ -32,7 +32,9 @@ app()->post('/start', function () use ($state) {
 
         $decor = new \App\Decor($_POST);
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
+//        if (isset($_POST['skip_notification']) && $_POST['skip_notification']) {
         $scenario->notify($broadcastId);
+//        }
 
         $state->setAttr('id', $broadcastId);
     }

@@ -58,9 +58,4 @@ class Utils
 
         return  implode("\n\n", $about);
     }
-
-    static function getYoutubeTitle()
-    {
-
-    }
 }
