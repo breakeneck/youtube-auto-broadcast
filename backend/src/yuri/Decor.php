@@ -80,6 +80,7 @@ class Decor
             $about[] = $url;
         } catch (\Exception $e) {
             echo "Error parsing VedaBase verse & book for building description: " . $e->getMessage();
+            return '';
         }
 
         return  implode("\n\n", $about);

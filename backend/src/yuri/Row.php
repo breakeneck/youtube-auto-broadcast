@@ -20,6 +20,7 @@ class Row {
         $this->book = $book;
         $this->verse = $verse;
         $this->theme = $theme;
+        $this->username = $username;
     }
 
     public function isValid()

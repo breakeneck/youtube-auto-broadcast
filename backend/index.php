@@ -14,6 +14,7 @@ app()->config(['debug' => $_ENV['APP_DEBUG']]);
 
 app()->get('/', function () use ($state) {
     $lastRows = \App\GoogleSheet::getRowsAfterToday();
+//    print_r($lastRows);die;
 
     echo app()->template->render('index', [
         'state' => $state,

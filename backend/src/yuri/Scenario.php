@@ -8,7 +8,6 @@ class Scenario
 {
     private $youtube;
     public $camera;
-    public $obsPid;
     public function __construct()
     {
         $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
@@ -19,6 +18,7 @@ class Scenario
     {
         $startTime = date('Y-m-d\TH:i:s\Z');
         $endTime = date('Y-m-d\TH:i:s\Z', strtotime("+ $lengthMinutes minutes"));
+
         $broadcastId = $this->youtube->createBroadcast($title, $description, $startTime, $endTime, $_ENV['YOUTUBE_PRIVACY']);
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
