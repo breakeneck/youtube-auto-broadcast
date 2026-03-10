@@ -1,0 +1,213 @@
+# Ukrainian translations for broadcast_project.
+# Copyright (C) 2026 ISKCON Lutsk
+# This file is distributed under the same license as the broadcast_project package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: broadcast_project 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-10 00:00+0000\n"
+"PO-Revision-Date: 2026-03-10 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: apps/broadcasts/models.py
+msgid "Bhagavad-gita"
+msgstr "Бгаґавад-ґіта"
+
+#: apps/broadcasts/models.py
+msgid "Srimad-Bhagavatam"
+msgstr "Шрімад-Бгаґаватам"
+
+#: apps/broadcasts/models.py
+msgid "Caitanya-caritamrta"
+msgstr "Чайтанья-чарітамріта"
+
+#: apps/broadcasts/models.py
+msgid "Lector"
+msgstr "Лектор"
+
+#: apps/broadcasts/models.py
+msgid "Lectors"
+msgstr "Лектори"
+
+#: apps/broadcasts/models.py
+msgid "Broadcast"
+msgstr "Трансляція"
+
+#: apps/broadcasts/models.py
+msgid "Broadcasts"
+msgstr "Трансляції"
+
+#: apps/broadcasts/models.py
+msgid "Scheduled"
+msgstr "Заплановано"
+
+#: apps/broadcasts/models.py
+msgid "Starting"
+msgstr "Запуск"
+
+#: apps/broadcasts/models.py
+msgid "Live"
+msgstr "В ефірі"
+
+#: apps/broadcasts/models.py
+msgid "Ending"
+msgstr "Завершення"
+
+#: apps/broadcasts/models.py
+msgid "Completed"
+msgstr "Завершено"
+
+#: apps/broadcasts/models.py
+msgid "Error"
+msgstr "Помилка"
+
+#: apps/broadcasts/models.py
+msgid "Cancelled"
+msgstr "Скасовано"
+
+#: apps/broadcasts/models.py
+msgid "Broadcast Log"
+msgstr "Журнал трансляцій"
+
+#: apps/broadcasts/models.py
+msgid "Broadcast Logs"
+msgstr "Журнали трансляцій"
+
+#: apps/schedule/models.py
+msgid "Schedule Entry"
+msgstr "Запис розкладу"
+
+#: apps/schedule/models.py
+msgid "Schedule Entries"
+msgstr "Записи розкладу"
+
+#: apps/schedule/models.py
+msgid "Monday"
+msgstr "Понеділок"
+
+#: apps/schedule/models.py
+msgid "Tuesday"
+msgstr "Вівторок"
+
+#: apps/schedule/models.py
+msgid "Wednesday"
+msgstr "Середа"
+
+#: apps/schedule/models.py
+msgid "Thursday"
+msgstr "Четвер"
+
+#: apps/schedule/models.py
+msgid "Friday"
+msgstr "П'ятниця"
+
+#: apps/schedule/models.py
+msgid "Saturday"
+msgstr "Субота"
+
+#: apps/schedule/models.py
+msgid "Sunday"
+msgstr "Неділя"
+
+#: apps/users/models.py
+msgid "Administrator"
+msgstr "Адміністратор"
+
+#: apps/users/models.py
+msgid "Broadcaster"
+msgstr "Мовець"
+
+#: apps/users/models.py
+msgid "Viewer"
+msgstr "Глядач"
+
+#: apps/users/models.py
+msgid "User"
+msgstr "Користувач"
+
+#: apps/users/models.py
+msgid "Users"
+msgstr "Користувачі"
+
+#: templates/base.html
+msgid "Broadcast Control"
+msgstr "Керування трансляцією"
+
+#: templates/base.html
+msgid "ISKCON Lutsk"
+msgstr "ІСККОН Луцьк"
+
+#: templates/broadcasts/index.html
+msgid "Live Broadcast"
+msgstr "Трансляція в ефірі"
+
+#: templates/broadcasts/index.html
+msgid "LIVE"
+msgstr "ЕФІР"
+
+#: templates/broadcasts/index.html
+msgid "Stop Broadcast"
+msgstr "Зупинити трансляцію"
+
+#: templates/broadcasts/index.html
+msgid "Restart Camera"
+msgstr "Перезавантажити камеру"
+
+#: templates/broadcasts/index.html
+msgid "Start Broadcast"
+msgstr "Почати трансляцію"
+
+#: templates/broadcasts/index.html
+msgid "Today:"
+msgstr "Сьогодні:"
+
+#: templates/broadcasts/index.html
+msgid "Quick Start from Schedule"
+msgstr "Швидкий старт з розкладу"
+
+#: templates/broadcasts/index.html
+msgid "Date"
+msgstr "Дата"
+
+#: templates/broadcasts/index.html
+msgid "Verse"
+msgstr "Вірш"
+
+#: templates/broadcasts/index.html
+msgid "Lector"
+msgstr "Лектор"
+
+#: templates/broadcasts/index.html
+msgid "Manual Start"
+msgstr "Ручний запуск"
+
+#: templates/broadcasts/index.html
+msgid "Custom title (optional)"
+msgstr "Власна назва (необов'язково)"
+
+#: templates/broadcasts/index.html
+msgid "Don't send notification"
+msgstr "Не надсилати сповіщення"
+
+#: templates/broadcasts/index.html
+msgid "Quick Actions"
+msgstr "Швидкі дії"
+
+#: templates/broadcasts/index.html
+msgid "Reset State"
+msgstr "Скинути стан"
+
+#: templates/broadcasts/index.html
+msgid "Stop All Apps"
+msgstr "Зупинити всі додатки"
+
+#: templates/broadcasts/index.html
+msgid "Upcoming Schedule"
+msgstr "Майбутній розклад"
