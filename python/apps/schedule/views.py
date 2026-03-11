@@ -241,4 +241,4 @@ def send_schedule_to_telegram(request):
         logger.exception(f'Failed to send schedule: {e}')
         messages.error(request, _('Failed to send schedule: %(error)s') % {'error': str(e)})
     
- return redirect('schedule:week')
+    return redirect('schedule:week')
