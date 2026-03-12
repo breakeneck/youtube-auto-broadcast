@@ -185,9 +185,30 @@
                         <i class="bi bi-globe"></i> {{ LANGUAGE_CODE|upper }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/en{{ request.path }}">English</a></li>
-                        <li><a class="dropdown-item" href="/uk{{ request.path }}">Українська</a></li>
-                        <li><a class="dropdown-item" href="/ru{{ request.path }}">Русский</a></li>
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.path }}">
+                                <input name="language" type="hidden" value="en">
+                                <button type="submit" class="dropdown-item">English</button>
+                            </form>
+                        </li>
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.path }}">
+                                <input name="language" type="hidden" value="uk">
+                                <button type="submit" class="dropdown-item">Українська</button>
+                            </form>
+                        </li>
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.path }}">
+                                <input name="language" type="hidden" value="ru">
+                                <button type="submit" class="dropdown-item">Русский</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
                 
