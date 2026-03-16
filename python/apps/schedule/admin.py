@@ -3,6 +3,8 @@ Admin configuration for the schedule application.
 """
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import ScheduleEntry, ScheduleSettings, TelegramMessage
 
@@ -13,12 +15,13 @@ class ScheduleEntryAdmin(admin.ModelAdmin):
     
     list_display = [
         'date', 'start_time', 'end_time', 'get_verse_display',
-        'lector', 'is_completed', 'is_skipped'
+        'lector', 'theme', 'is_completed', 'is_skipped', 'week_view_link'
     ]
     list_filter = ['book', 'lector', 'is_completed', 'is_skipped', 'date']
     search_fields = ['verse', 'custom_title', 'theme', 'notes']
     date_hierarchy = 'date'
     ordering = ['-date', 'start_time']
+    list_editable = ['start_time', 'is_skipped']
     
     fieldsets = (
         (_('Date & Time'), {
@@ -44,6 +47,12 @@ class ScheduleEntryAdmin(admin.ModelAdmin):
             return f'{obj.get_book_display()} {obj.verse}'
         return '-'
     get_verse_display.short_description = _('Verse')
+    
+    def week_view_link(self, obj):
+        """Link to week view."""
+        url = reverse('schedule:week') + f'?week={obj.date.strftime("%Y-%m-%d")}'
+        return format_html('<a href="{}" target="_blank">{}</a>', url, _('Week View'))
+    week_view_link.short_description = _('Week View')
     
     actions = ['mark_completed', 'mark_skipped', 'duplicate_to_next_week']
     
@@ -77,6 +86,12 @@ class ScheduleEntryAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, _('%(count)d entries duplicated to next week.') % {'count': count})
     duplicate_to_next_week.short_description = _('Duplicate to next week')
+    
+    def changelist_view(self, request, extra_context=None):
+        """Add link to week view in changelist."""
+        extra_context = extra_context or {}
+        extra_context['week_view_url'] = reverse('schedule:week')
+        return super().changelist_view(request, extra_context)
 
 
 @admin.register(ScheduleSettings)

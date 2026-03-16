@@ -13,8 +13,13 @@ urlpatterns = [
     path('<int:pk>/edit/', views.ScheduleUpdateView.as_view(), name='edit'),
     path('<int:pk>/delete/', views.ScheduleDeleteView.as_view(), name='delete'),
     
-    # Weekly schedule
+    # Weekly schedule (Google Sheets style)
     path('week/', views.WeeklyScheduleView.as_view(), name='week'),
+    path('entry/create/', views.entry_create, name='entry_create'),
+    path('entry/<int:pk>/update/', views.entry_update, name='entry_update'),
+    path('entry/<int:pk>/delete/', views.entry_delete, name='entry_delete'),
+    
+    # Generate shlokas
     path('generate/', views.generate_week_shlokas, name='generate'),
     
     # Telegram

@@ -4,7 +4,7 @@ Views for the schedule application.
 Schedule management and weekly schedule generation.
 """
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -22,6 +22,11 @@ from apps.broadcasts.models import Lector, Book
 from apps.integrations.services import TelegramService, ShastraService
 
 logger = logging.getLogger(__name__)
+
+# Ukrainian day names
+DAY_NAMES_UK = {
+    0: 'пн', 1: 'вт', 2: 'ср', 3: 'чт', 4: 'пт', 5: 'сб', 6: 'нд'
+}
 
 
 class AdminRequiredMixin(UserPassesTestMixin):
@@ -105,7 +110,7 @@ class ScheduleDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
 
 
 class WeeklyScheduleView(LoginRequiredMixin, AdminRequiredMixin, View):
-    """View for weekly schedule management."""
+    """View for weekly schedule management - Google Sheets style."""
     
     template_name = 'schedule/week.html'
     
@@ -113,37 +118,69 @@ class WeeklyScheduleView(LoginRequiredMixin, AdminRequiredMixin, View):
         # Get settings
         settings = ScheduleSettings.load()
         
-        # Get current week
+        # Get week parameter or use current week
+        week_param = request.GET.get('week')
         today = timezone.now().date()
-        week_start = today - timedelta(days=today.weekday())
+        
+        if week_param:
+            try:
+                week_start = datetime.strptime(week_param, '%Y-%m-%d').date()
+                # Adjust to Monday
+                week_start = week_start - timedelta(days=week_start.weekday())
+            except ValueError:
+                week_start = today - timedelta(days=today.weekday())
+        else:
+            week_start = today - timedelta(days=today.weekday())
+        
         week_end = week_start + timedelta(days=6)
         
-        # Get entries for current and next week
-        current_week_entries = ScheduleEntry.objects.filter(
+        # Navigation weeks
+        prev_week = (week_start - timedelta(days=7)).strftime('%Y-%m-%d')
+        next_week = (week_start + timedelta(days=7)).strftime('%Y-%m-%d')
+        current_week = today - timedelta(days=today.weekday())
+        current_week = current_week.strftime('%Y-%m-%d')
+        
+        # Get all entries for the week
+        entries = ScheduleEntry.objects.filter(
             date__gte=week_start,
             date__lte=week_end,
         ).select_related('lector').order_by('date', 'start_time')
         
-        next_week_start = week_start + timedelta(days=7)
-        next_week_end = week_end + timedelta(days=7)
+        # Group entries by date
+        entries_by_date = {}
+        for entry in entries:
+            date_str = entry.date.strftime('%Y-%m-%d')
+            if date_str not in entries_by_date:
+                entries_by_date[date_str] = []
+            entries_by_date[date_str].append(entry)
         
-        next_week_entries = ScheduleEntry.objects.filter(
-            date__gte=next_week_start,
-            date__lte=next_week_end,
-        ).select_related('lector').order_by('date', 'start_time')
+        # Build week days data
+        week_days = []
+        for i in range(7):
+            day_date = week_start + timedelta(days=i)
+            date_str = day_date.strftime('%Y-%m-%d')
+            day_entries = entries_by_date.get(date_str, [])
+            
+            week_days.append({
+                'date': day_date,
+                'day_name': DAY_NAMES_UK.get(day_date.weekday(), ''),
+                'is_today': day_date == today,
+                'entries': day_entries,
+            })
         
-        # Get lectors
+        # Get lectors and books for forms
         lectors = Lector.objects.filter(is_active=True).order_by('name')
         
         context = {
             'settings': settings,
-            'current_week_start': week_start,
-            'current_week_end': week_end,
-            'current_week_entries': current_week_entries,
-            'next_week_start': next_week_start,
-            'next_week_end': next_week_end,
-            'next_week_entries': next_week_entries,
+            'week_start': week_start,
+            'week_end': week_end,
+            'week_days': week_days,
+            'prev_week': prev_week,
+            'next_week': next_week,
+            'current_week': current_week,
             'lectors': lectors,
+            'books': Book.choices,
         }
         
         return render(request, self.template_name, context)
@@ -242,3 +279,127 @@ def send_schedule_to_telegram(request):
         messages.error(request, _('Failed to send schedule: %(error)s') % {'error': str(e)})
     
     return redirect('schedule:week')
+
+
+@login_required
+def entry_create(request):
+    """
+    Create a new schedule entry via AJAX.
+    """
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    
+    try:
+        date_str = request.POST.get('date')
+        start_time_str = request.POST.get('start_time')
+        book = request.POST.get('book') or None
+        verse = request.POST.get('verse') or None
+        lector_id = request.POST.get('lector') or None
+        theme = request.POST.get('theme') or None
+        
+        if not date_str or not start_time_str:
+            return JsonResponse({'success': False, 'error': 'Date and time are required'}, status=400)
+        
+        # Parse date and time
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        start_time = datetime.strptime(start_time_str, '%H:%M').time()
+        
+        # Get lector
+        lector = None
+        if lector_id:
+            try:
+                lector = Lector.objects.get(pk=int(lector_id))
+            except (Lector.DoesNotExist, ValueError):
+                pass
+        
+        # Create entry
+        entry = ScheduleEntry.objects.create(
+            date=date,
+            start_time=start_time,
+            book=book,
+            verse=verse,
+            lector=lector,
+            theme=theme,
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'entry_id': entry.id,
+        })
+        
+    except Exception as e:
+        logger.exception(f'Failed to create entry: {e}')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def entry_update(request, pk):
+    """
+    Update a schedule entry field via AJAX.
+    """
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    
+    try:
+        entry = get_object_or_404(ScheduleEntry, pk=pk)
+        
+        field = request.POST.get('field')
+        value = request.POST.get('value')
+        
+        if field == 'start_time':
+            if value:
+                entry.start_time = datetime.strptime(value, '%H:%M').time()
+            else:
+                return JsonResponse({'success': False, 'error': 'Time is required'}, status=400)
+        elif field == 'book':
+            entry.book = value or None
+        elif field == 'verse':
+            entry.verse = value or None
+        elif field == 'lector':
+            if value:
+                try:
+                    entry.lector = Lector.objects.get(pk=int(value))
+                except (Lector.DoesNotExist, ValueError):
+                    entry.lector = None
+            else:
+                entry.lector = None
+        elif field == 'theme':
+            entry.theme = value or None
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid field'}, status=400)
+        
+        entry.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        logger.exception(f'Failed to update entry: {e}')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def entry_delete(request, pk):
+    """
+    Delete a schedule entry via AJAX.
+    """
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    
+    try:
+        entry = get_object_or_404(ScheduleEntry, pk=pk)
+        entry.delete()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        logger.exception(f'Failed to delete entry: {e}')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

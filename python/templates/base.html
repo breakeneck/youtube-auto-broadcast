@@ -172,6 +172,11 @@
                     
                     {% if user.is_authenticated and user.is_admin %}
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'schedule:week' %}">
+                            <i class="bi bi-calendar-week"></i> {% trans 'Schedule' %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'admin:index' %}">
                             <i class="bi bi-gear"></i> {% trans 'Admin' %}
                         </a>
