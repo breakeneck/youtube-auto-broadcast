@@ -75,13 +75,19 @@ class Telegram
 }
 
 */
-    public function message($chatId, $text)
+    public function message($chatId, $text, $messageThreadId = null)
     {
+        $data = [
+            'chat_id' => $chatId,
+            'text' => $text
+        ];
+        
+        if ($messageThreadId !== null) {
+            $data['message_thread_id'] = $messageThreadId;
+        }
+        
         return (new Request())
-            ->setData([
-                'chat_id' => $chatId,
-                'text' => $text
-            ])
+            ->setData($data)
             ->get('https://api.telegram.org/bot{token}/sendMessage', ['{token}' => $this->token]);
     }
 
