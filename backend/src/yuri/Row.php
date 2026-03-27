@@ -31,7 +31,9 @@ class Row {
 
     public function isValid()
     {
-        return $this->book && $this->verse && $this->username;
+        // For scheduled broadcasts, only username is required
+        // book and verse are optional metadata
+        return $this->username;
     }
 
     function isToday(): bool
