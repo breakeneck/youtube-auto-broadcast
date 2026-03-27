@@ -87,7 +87,7 @@
         <?php if (! $row->verse) continue ?>
         <td>
             <?php if ($row->time):?>
-                <strong><?=$row->time?></strong>
+                <strong><?=$row->dayOfWeek()?> <?=$row->time?></strong>
             <?php else:?>
                 <?=$row->dateTableFormat()?>
             <?php endif;?>
