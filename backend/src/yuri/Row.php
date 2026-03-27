@@ -11,9 +11,11 @@ class Row {
     public $verse;
     public $username;
     public $theme;
+    public $time;       // Time in format "H:i" (e.g., "07:55")
+    public $duration;   // Duration in minutes (e.g., "60")
 //    public $title;
 
-    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null, $theme = null)
+    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null, $theme = null, $time = null, $duration = null)
     {
         $this->isManualMode = (bool)$isManualMode;
         $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
@@ -21,6 +23,8 @@ class Row {
         $this->verse = $verse;
         $this->theme = $theme;
         $this->username = $username;
+        $this->time = $time;
+        $this->duration = $duration ? (int)$duration : null;
     }
 
     public function isValid()
@@ -57,5 +61,82 @@ class Row {
             return Utils::getLocalTimeStr($this->date, 'EEEEEE');
         }
         return '';
+    }
+
+    /**
+     * Check if the scheduled time matches current time (within 1 minute tolerance)
+     */
+    function isScheduledNow(): bool
+    {
+        if (!$this->time || !$this->date instanceof \DateTime) {
+            return false;
+        }
+        
+        // Check if today is the scheduled date
+        if (!$this->isToday()) {
+            return false;
+        }
+        
+        // Parse scheduled time
+        $scheduledTime = \DateTime::createFromFormat('H:i', $this->time);
+        if (!$scheduledTime) {
+            return false;
+        }
+        
+        // Get current time
+        $now = new \DateTime();
+        
+        // Compare hours and minutes
+        $scheduledMinutes = (int)$scheduledTime->format('H') * 60 + (int)$scheduledTime->format('i');
+        $nowMinutes = (int)$now->format('H') * 60 + (int)$now->format('i');
+        
+        // Allow 1 minute tolerance for cron job running slightly late
+        return abs($scheduledMinutes - $nowMinutes) <= 1;
+    }
+
+    /**
+     * Get broadcast end time based on scheduled time + duration
+     */
+    function getScheduledEndTime(): ?\DateTime
+    {
+        if (!$this->time || !$this->duration) {
+            return null;
+        }
+        
+        $startTime = \DateTime::createFromFormat('H:i', $this->time);
+        if (!$startTime) {
+            return null;
+        }
+        
+        // Create a DateTime for today at the scheduled time
+        $endTime = new \DateTime();
+        $endTime->setTime((int)$startTime->format('H'), (int)$startTime->format('i'));
+        $endTime->modify("+{$this->duration} minutes");
+        
+        return $endTime;
+    }
+
+    /**
+     * Check if the broadcast should stop now based on scheduled end time
+     */
+    function shouldStopNow(): bool
+    {
+        if (!$this->duration || !$this->date instanceof \DateTime) {
+            return false;
+        }
+        
+        if (!$this->isToday()) {
+            return false;
+        }
+        
+        $endTime = $this->getScheduledEndTime();
+        if (!$endTime) {
+            return false;
+        }
+        
+        $now = new \DateTime();
+        
+        // Check if current time is at or past the end time (with 1 minute tolerance)
+        return $now >= $endTime || ($now->format('H:i') === $endTime->format('H:i'));
     }
 }

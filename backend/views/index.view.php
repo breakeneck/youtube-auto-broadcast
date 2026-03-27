@@ -1,7 +1,7 @@
 <?php /**
 * @var \App\Row[] $lastRows
- */
-?>
+* @var \App\Row|null $currentScheduledRow
+*/ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,52 +50,98 @@
 
 <?php if ($state->getAttr('id')):?>
     <br/>
-    <br/>
-    <br/>
-    <form method="post" action="/stop">
-        <a class="icon-link" href="https://www.youtube.com/watch?v=<?=$state->getAttr('id')?>">
-            <i class="bi bi-youtube"></i>
-            Youtube
-        </a>
-        <button type="submit" class="btn btn-primary">
-            <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-            Завершити трансляцію
-        </button>
-    </form>
-    <br/>
-    <a href="/resetcam">Перезавантажити камеру</a>
-<?php else: ?>
-    <div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?>
-        &nbsp;&nbsp;<input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
-    </div>
-    <table class="table table-striped table-hover">
-        <?php foreach ($lastRows as $row):?>
-        <tr>
-            <?php if (! $row->verse) continue ?>
-            <td><?=$row->dateTableFormat()?></td>
-<!--            <td>--><?php //=$row->dayOfWeek()?><!--</td>-->
-<!--            <td>--><?php //=$row->book?><!--</td>-->
-            <td>
-                <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
-                    <?=$row->book .' ' . $row->verse?>
+    <div class="broadcast-active p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-broadcast"></i> 
+                <strong>Трансляція запущена</strong>
+                <?php if ($currentScheduledRow):?>
+                    <br><small><?=(new \App\Decor($currentScheduledRow))->getTitle()?></small>
+                <?php endif;?>
+            </div>
+            <div>
+                <a class="icon-link" href="https://www.youtube.com/watch?v=<?=$state->getAttr('id')?>">
+                    <i class="bi bi-youtube"></i>
+                    Youtube
                 </a>
-            </td>
-            <td><?=$row->username?></td>
-            <?php if ($row->isValid()):?>
-                <td>
+            </div>
+        </div>
+        <form method="post" action="/stop" class="mt-2">
+            <button type="submit" class="btn btn-danger btn-sm">
+                <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                Зупинити трансляцію
+            </button>
+        </form>
+    </div>
+<!--    <a href="/resetcam" class="mb-3 d-inline-block">Перезавантажити камеру</a>-->
+<?php endif; ?>
+
+<div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?>
+    <?php if (!$state->getAttr('id')):?>
+        &nbsp;&nbsp;<input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
+    <?php endif;?>
+</div>
+<table class="table table-striped table-hover">
+    <?php foreach ($lastRows as $row):?>
+    <tr class="<?=$currentScheduledRow && $currentScheduledRow->dateFormatted() === $row->dateFormatted() && $currentScheduledRow->time === $row->time ? 'scheduled-now' : ''?>">
+        <?php if (! $row->verse) continue ?>
+        <td>
+            <?php if ($row->time):?>
+                <strong><?=$row->time?></strong>
+            <?php else:?>
+                <?=$row->dateTableFormat()?>
+            <?php endif;?>
+        </td>
+        <td>
+            <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
+                <?=$row->book .' ' . $row->verse?>
+            </a>
+        </td>
+        <td><?=$row->username?></td>
+        <?php if ($row->isValid()):?>
+            <td>
+                <?php 
+                // Check if this row is currently scheduled to run
+                $isScheduledNow = $row->isScheduledNow();
+                $isCurrentlyRunning = $currentScheduledRow && 
+                    $currentScheduledRow->dateFormatted() === $row->dateFormatted() && 
+                    $currentScheduledRow->time === $row->time;
+                ?>
+                
+                <?php if ($isCurrentlyRunning):?>
+                    <button type="button" class="btn btn-warning btn-sm" disabled>
+                        <i class="bi bi-broadcast"></i> Зараз
+                    </button>
+                <?php elseif ($isScheduledNow && !$state->getAttr('id')):?>
                     <button type="button" class="go btn btn-success"
                             data-username="<?=$row->username?>"
                             data-verse="<?=$row->verse?>"
                             data-book="<?=$row->book?>"
                     >
                         <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                        <i class="bi bi-play-fill"></i> Старт
+                    </button>
+                <?php elseif ($row->time && !$state->getAttr('id')):?>
+                    <small class="text-muted"><?=$row->time?></small>
+                <?php elseif (!$state->getAttr('id')):?>
+                    <button type="button" class="go btn btn-outline-success btn-sm"
+                            data-username="<?=$row->username?>"
+                            data-verse="<?=$row->verse?>"
+                            data-book="<?=$row->book?>"
+                    >
                         Go
                     </button>
-                </td>
-            <?php endif ?>
-        </tr>
-        <?php endforeach; ?>
-    </table>
+                <?php endif;?>
+            </td>
+        <?php endif ?>
+        <?php if ($row->duration):?>
+            <td><small class="text-muted"><?=$row->duration?> хв</small></td>
+        <?php endif;?>
+    </tr>
+    <?php endforeach; ?>
+</table>
+
+<?php if (!$state->getAttr('id')):?>
     <form id="form" method="post" action="/start">
     <br/>
     <div class="flex">

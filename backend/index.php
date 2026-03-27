@@ -11,14 +11,21 @@ app()->template->config('path', __DIR__ . '/views');
 
 app()->config(['debug' => $_ENV['APP_DEBUG']]);
 
+// Get current scheduled row if broadcast is running
+$currentScheduledRow = null;
+if ($state->getAttr('id') && $state->getAttr('scheduled_row')) {
+    $scheduledData = $state->getAttr('scheduled_row');
+    $currentScheduledRow = new \App\Row(...$scheduledData);
+}
 
-app()->get('/', function () use ($state) {
+app()->get('/', function () use ($state, $currentScheduledRow) {
     $lastRows = \App\GoogleSheet::getRowsAfterToday();
 //    print_r($lastRows);die;
 
     echo app()->template->render('index', [
         'state' => $state,
         'lastRows' => $lastRows ?? [],
+        'currentScheduledRow' => $currentScheduledRow,
     ]);
 });
 
@@ -48,12 +55,14 @@ app()->post('/stop', function () use ($state) {
     $scenario->stopObs();
 
     $state->setAttr('id', null);
+    $state->setAttr('scheduled_row', null);
 
     app()->response()->redirect('/');
 });
 
 app()->get('/reset', function () use ($state) {
     $state->setAttr('id', null);
+    $state->setAttr('scheduled_row', null);
 
     app()->response()->redirect('/');
 });

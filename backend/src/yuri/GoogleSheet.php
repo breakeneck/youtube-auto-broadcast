@@ -1,61 +1,13 @@
 <?php
 
 namespace App;
-//
-//const UA_DATE_FORMAT = 'd.m.Y';
-//class Row {
-//    public $isManualMode;
-//    public $date;
-//    public $book;
-//    public $verse;
-//    public $username;
-////    public $title;
-//
-//    public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null)
-//    {
-//        $this->isManualMode = (bool)$isManualMode;
-//        $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
-//        $this->book = $book;
-//        $this->verse = $verse;
-//        $this->username = $username;
-//    }
-//
-//    public function isValid()
-//    {
-//        return $this->book && $this->verse && $this->username;
-//    }
-//
-//    function isToday(): bool
-//    {
-//        return $this->date instanceof \DateTime && $this->date->format(UA_DATE_FORMAT) == date(UA_DATE_FORMAT);
-//    }
-//
-//    function isWeekTransition($prevRow): bool
-//    {
-//        return $prevRow->date instanceof \DateTime && $this->date instanceof \DateTime
-//            && $this->date->format('N') < $prevRow->date->format('N');
-//    }
-//
-//    function dateFormatted()
-//    {
-//        return $this->date instanceof \DateTime ? $this->date->format(UA_DATE_FORMAT) : '';
-//    }
-//
-//    function dayOfWeek()
-//    {
-//        if ($this->date instanceof \DateTime) {
-//            return Utils::getLocalTimeStr($this->date->format('Y-m-d'), 'EEEEEE');
-//        }
-//        return '';
-//    }
-//}
-
 class GoogleSheet
 {
     static function getRowsAfterToday($count = 7)
     {
         try {
-            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:G");
+            // Extended range to include time (H) and duration (I) columns
+            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:I");
         } catch (\Exception $e) {
             return [];
         }
@@ -79,6 +31,60 @@ class GoogleSheet
         }
 
         return $lastRows;
+    }
+
+    /**
+     * Get all scheduled rows (rows with time set) for today
+     */
+    static function getScheduledRowsForToday()
+    {
+        $rows = self::getRowsAfterToday(1);
+        
+        return array_filter($rows, function($row) {
+            return $row->time && $row->isValid();
+        });
+    }
+
+    /**
+     * Get a row that is currently scheduled to start
+     */
+    static function getRowScheduledToStartNow()
+    {
+        $rows = self::getScheduledRowsForToday();
+        
+        foreach ($rows as $row) {
+            if ($row->isScheduledNow()) {
+                return $row;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get a row that is currently running and should stop now
+     */
+    static function getRowScheduledToStopNow($currentBroadcastId)
+    {
+        if (!$currentBroadcastId) {
+            return null;
+        }
+        
+        // Get the row that started this broadcast from state
+        $state = new SimpleState();
+        $scheduledRowData = $state->getAttr('scheduled_row');
+        
+        if (!$scheduledRowData) {
+            return null;
+        }
+        
+        $row = new Row(...$scheduledRowData);
+        
+        if ($row->shouldStopNow()) {
+            return $row;
+        }
+        
+        return null;
     }
 
     static function getTodaysRow()

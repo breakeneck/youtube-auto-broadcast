@@ -43,11 +43,17 @@ class ScheduleEntry(TimeStampedModel):
         help_text=_('Scheduled start time')
     )
     
+    duration = models.PositiveIntegerField(
+        _('Duration (minutes)'),
+        default=90,
+        help_text=_('Broadcast duration in minutes')
+    )
+    
     end_time = models.TimeField(
         _('End Time'),
         blank=True,
         null=True,
-        help_text=_('Scheduled end time (optional)')
+        help_text=_('Scheduled end time (optional, calculated from start_time + duration)')
     )
     
     # Shastra reference
@@ -134,6 +140,15 @@ class ScheduleEntry(TimeStampedModel):
         verbose_name_plural = _('Schedule Entries')
         ordering = ['date', 'start_time']
         unique_together = ['date', 'start_time']
+    
+    def save(self, *args, **kwargs):
+        """Auto-calculate end_time from start_time and duration."""
+        if self.start_time and self.duration and not self.end_time:
+            from datetime import datetime, timedelta
+            start_datetime = datetime.combine(self.date, self.start_time)
+            end_datetime = start_datetime + timedelta(minutes=self.duration)
+            self.end_time = end_datetime.time()
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f'{self.date} {self.start_time} - {self.get_title()}'
