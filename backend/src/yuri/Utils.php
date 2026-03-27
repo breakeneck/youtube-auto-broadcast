@@ -52,8 +52,8 @@ class Utils
         $parser->parseVedabase();
 
         $about[] = $book . ' ' . $verse . "\n" . $parser->sankrit;
-        $about[] = "Послівний переклад\n" . $parser->transcribe;
-        $about[] = "Переклад\n" . $parser->translation;
+        $about[] = "\n" . $parser->transcribe;
+        $about[] = "\n" . $parser->translation;
         $about[] = $url;
 
         return  implode("\n\n", $about);

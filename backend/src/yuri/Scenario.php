@@ -41,9 +41,12 @@ class Scenario
         $this->youtube->finish($broadcastId);
     }
 
-    public function notify($broadcastId)
+    public function notify($broadcastId, $description = '')
     {
         $message = "https://www.youtube.com/watch?v=$broadcastId";
+        if ($description) {
+            $message .= "\n\n" . $description;
+        }
         $threadId = isset($_ENV['TG_MESSAGE_THREAD_ID']) ? $_ENV['TG_MESSAGE_THREAD_ID'] : null;
         (new \App\Telegram($_ENV['TG_API_TOKEN']))->message($_ENV['TG_CHAT_ID'], $message, $threadId);
     }

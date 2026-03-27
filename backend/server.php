@@ -46,7 +46,7 @@ function doStart($state, $row = null) {
 
     $duration = $decor->row->duration ?: 120; // Default 120 minutes if not specified
     $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription(), $duration);
-    $scenario->notify($broadcastId);
+    $scenario->notify($broadcastId, $decor->getDescription());
 
     $state->setAttr('id', $broadcastId);
     

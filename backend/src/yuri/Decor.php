@@ -75,8 +75,8 @@ class Decor
             $parser->parseVedabase();
 
             $about[] = $this->row->book . ' ' . $this->row->verse . "\n" . $parser->sankrit;
-            $about[] = "Послівний переклад\n" . $parser->transcribe;
-            $about[] = "Переклад\n" . $parser->translation;
+            $about[] = "\n" . $parser->transcribe;
+            $about[] = "\n" . $parser->translation;
             $about[] = $url;
         } catch (\Exception $e) {
             echo "Error parsing VedaBase verse & book for building description: " . $e->getMessage();

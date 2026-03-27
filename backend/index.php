@@ -39,7 +39,7 @@ app()->post('/start', function () use ($state) {
 
         $decor = new \App\Decor($_POST);
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
-        $scenario->notify($broadcastId);
+        $scenario->notify($broadcastId, $decor->getDescription());
 
         $state->setAttr('id', $broadcastId);
     }
