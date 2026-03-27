@@ -41,9 +41,11 @@ class Scenario
         $this->youtube->finish($broadcastId);
     }
 
-    public function notify($broadcastId, $description = '')
+    public function notify($broadcastId, $title, $description = '')
     {
-        $message = "https://www.youtube.com/watch?v=$broadcastId";
+        $message = $title ? "$title\n" : '';
+        $message .= "https://www.youtube.com/watch?v=$broadcastId";
+        
         if ($description) {
             $message .= "\n\n" . $description;
         }

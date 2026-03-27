@@ -60,7 +60,23 @@ class Decor
     }
     public function getTitle()
     {
-        return $this->title ?: "{$this->row->book} {$this->row->verse} - {$this->row->username}" . ($this->row->theme ? " - {$this->row->theme}" : '');
+        if ($this->title) {
+            return $this->title;
+        }
+
+        // Build title from available fields
+        $parts = [];
+        if ($this->row->book && $this->row->verse) {
+            $parts[] = "{$this->row->book} {$this->row->verse}";
+        }
+        if ($this->row->username) {
+            $parts[] = $this->row->username;
+        }
+        if ($this->row->theme) {
+            $parts[] = $this->row->theme;
+        }
+
+        return implode(' - ', $parts) ?: 'Трансляція';
     }
 
     public function getDescription()
