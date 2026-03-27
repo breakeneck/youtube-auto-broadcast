@@ -68,7 +68,7 @@ class Row {
     }
 
     /**
-     * Check if the scheduled time matches current time (within 5 minute tolerance)
+     * Check if the scheduled time matches current time (within 1 minute tolerance)
      */
     function isScheduledNow(): bool
     {
@@ -94,9 +94,8 @@ class Row {
         $scheduledMinutes = (int)$scheduledTime->format('H') * 60 + (int)$scheduledTime->format('i');
         $nowMinutes = (int)$now->format('H') * 60 + (int)$now->format('i');
         
-        // Allow 5 minute tolerance for cron job running slightly late
-        // This ensures broadcasts still start if cron is delayed
-        return abs($scheduledMinutes - $nowMinutes) <= 5;
+        // Allow 1 minute tolerance for cron job running slightly late
+        return abs($scheduledMinutes - $nowMinutes) <= 1;
     }
 
     /**
