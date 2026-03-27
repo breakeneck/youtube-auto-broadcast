@@ -6,8 +6,8 @@ class GoogleSheet
     static function getRowsAfterToday($count = 7)
     {
         try {
-            // Range A:H - user data structure
-            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:H");
+            // Range A:I - user data structure (added column I for theme)
+            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:I");
         } catch (\Exception $e) {
             return [];
         }
