@@ -18,7 +18,7 @@ class GoogleSheet
         foreach ($rawRows as $rowArray) {
             // Reorder columns to match Row constructor:
             // Row: isManualMode, date, dayOfWeek, book, verse, username, theme, time, duration
-            // Sheet: empty, date, time, duration, dayOfWeek, book, verse, username
+            // Sheet: empty, date, time, duration, dayOfWeek, book, verse, username, theme
             $reordered = [
                 $rowArray[0] ?? null,           // A: isManualMode
                 $rowArray[1] ?? null,           // B: date
@@ -26,7 +26,7 @@ class GoogleSheet
                 $rowArray[5] ?? null,           // F: book
                 $rowArray[6] ?? null,           // G: verse
                 $rowArray[7] ?? null,           // H: username
-                null,                            // theme (not in sheet)
+                $rowArray[8] ?? null,           // I: theme (optional)
                 $rowArray[2] ?? null,           // C: time
                 $rowArray[3] ?? null,           // D: duration
             ];

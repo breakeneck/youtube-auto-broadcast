@@ -1,4 +1,5 @@
-<?php /**
+<?php
+/**
 * @var \App\Row[] $lastRows
 * @var \App\Row|null $currentScheduledRow
 */ ?>
@@ -84,7 +85,7 @@
 <table class="table table-striped table-hover">
     <?php foreach ($lastRows as $row):?>
     <tr class="<?=$currentScheduledRow && $currentScheduledRow->dateFormatted() === $row->dateFormatted() && $currentScheduledRow->time === $row->time ? 'scheduled-now' : ''?>">
-        <?php if (! $row->verse) continue ?>
+        <?php if (!$row->username && !$row->theme) continue ?>
         <td>
             <?php if ($row->time):?>
                 <strong><?=$row->dayOfWeek()?> <?=$row->time?></strong>
@@ -92,12 +93,14 @@
                 <?=$row->dateTableFormat()?>
             <?php endif;?>
         </td>
+        <?php if ($row->book && $row->verse):?>
         <td>
             <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
                 <?=$row->book .' ' . $row->verse?>
             </a>
         </td>
-        <td><?=$row->username?></td>
+        <?php endif;?>
+        <td><?=$row->username?><?php if ($row->theme):?> — <?=$row->theme?><?php endif;?></td>
         <?php if ($row->isValid()):?>
             <td>
                 <?php 
@@ -122,7 +125,7 @@
                         <i class="bi bi-play-fill"></i> Старт
                     </button>
                 <?php elseif ($row->time && !$state->getAttr('id')):?>
-                    <small class="text-muted"><?=$row->time?></small>
+                    <?php /* time already shown in first column */ ?>
                 <?php elseif (!$state->getAttr('id')):?>
                     <button type="button" class="go btn btn-outline-success btn-sm"
                             data-username="<?=$row->username?>"
