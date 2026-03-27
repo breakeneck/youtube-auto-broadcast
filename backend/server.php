@@ -42,7 +42,4 @@ switch ($action) {
         $state->setAttr('id', null);
         break;
 
-    case 'reset':
-        $state->setAttr('id', null);
-        break;
 }

@@ -27,15 +27,12 @@ app()->post('/start', function () use ($state) {
 
     if (!$state->getAttr('id') ) {
         $scenario = new App\Scenario();
-//        $scenario->camera->zoomIn();
         $scenario->startObs();
         $scenario->wait(10);
 
         $decor = new \App\Decor($_POST);
         $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
-//        if (isset($_POST['skip_notification']) && $_POST['skip_notification']) {
         $scenario->notify($broadcastId);
-//        }
 
         $state->setAttr('id', $broadcastId);
     }
@@ -49,7 +46,6 @@ app()->post('/stop', function () use ($state) {
     $scenario = new App\Scenario();
     $scenario->finishBroadcast($broadcastId);
     $scenario->stopObs();
-//    $scenario->camera->zoomOut();
 
     $state->setAttr('id', null);
 
@@ -59,16 +55,6 @@ app()->post('/stop', function () use ($state) {
 app()->get('/reset', function () use ($state) {
     $state->setAttr('id', null);
 
-    app()->response()->redirect('/');
-});
-
-app()->get('/resetcam', function () use ($state) {
-    $broadcastId = $state->getAttr('id');
-
-    if ($broadcastId) {
-        $scenario = new App\Scenario();
-        $scenario->restartCamera();
-    }
     app()->response()->redirect('/');
 });
 
