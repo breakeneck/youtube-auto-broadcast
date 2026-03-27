@@ -4,6 +4,8 @@ namespace App;
 
 const UA_DATE_FORMAT = 'd.m.Y';
 const TABLE_DATE_FORMAT = 'd.m';
+const LOCAL_TIMEZONE = 'Europe/Kiev';
+
 class Row {
     public $isManualMode;
     public $date;
@@ -18,7 +20,7 @@ class Row {
     public function __construct($isManualMode = false, $date = null, $dayOfWeek = null, $book = null, $verse = null, $username = null, $theme = null, $time = null, $duration = null)
     {
         $this->isManualMode = (bool)$isManualMode;
-        $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date) : null;
+        $this->date = $date ? \DateTime::createFromFormat(UA_DATE_FORMAT, $date, new \DateTimeZone(LOCAL_TIMEZONE)) : null;
         $this->book = $book;
         $this->verse = $verse;
         $this->theme = $theme;
@@ -34,7 +36,9 @@ class Row {
 
     function isToday(): bool
     {
-        return $this->date instanceof \DateTime && $this->date->format(UA_DATE_FORMAT) == date(UA_DATE_FORMAT);
+        // Use LOCAL_TIMEZONE for date comparison
+        $now = new \DateTime('now', new \DateTimeZone(LOCAL_TIMEZONE));
+        return $this->date instanceof \DateTime && $this->date->format(UA_DATE_FORMAT) == $now->format(UA_DATE_FORMAT);
     }
 
     function isWeekTransition($prevRow): bool
@@ -77,14 +81,14 @@ class Row {
             return false;
         }
         
-        // Parse scheduled time
-        $scheduledTime = \DateTime::createFromFormat('H:i', $this->time);
+        // Parse scheduled time in LOCAL_TIMEZONE
+        $scheduledTime = \DateTime::createFromFormat('H:i', $this->time, new \DateTimeZone(LOCAL_TIMEZONE));
         if (!$scheduledTime) {
             return false;
         }
         
-        // Get current time
-        $now = new \DateTime();
+        // Get current time in LOCAL_TIMEZONE
+        $now = new \DateTime('now', new \DateTimeZone(LOCAL_TIMEZONE));
         
         // Compare hours and minutes
         $scheduledMinutes = (int)$scheduledTime->format('H') * 60 + (int)$scheduledTime->format('i');
@@ -103,13 +107,13 @@ class Row {
             return null;
         }
         
-        $startTime = \DateTime::createFromFormat('H:i', $this->time);
+        $startTime = \DateTime::createFromFormat('H:i', $this->time, new \DateTimeZone(LOCAL_TIMEZONE));
         if (!$startTime) {
             return null;
         }
         
-        // Create a DateTime for today at the scheduled time
-        $endTime = new \DateTime();
+        // Create a DateTime for today at the scheduled time in LOCAL_TIMEZONE
+        $endTime = new \DateTime('now', new \DateTimeZone(LOCAL_TIMEZONE));
         $endTime->setTime((int)$startTime->format('H'), (int)$startTime->format('i'));
         $endTime->modify("+{$this->duration} minutes");
         
@@ -134,7 +138,8 @@ class Row {
             return false;
         }
         
-        $now = new \DateTime();
+        // Get current time in LOCAL_TIMEZONE
+        $now = new \DateTime('now', new \DateTimeZone(LOCAL_TIMEZONE));
         
         // Check if current time is at or past the end time (with 1 minute tolerance)
         return $now >= $endTime || ($now->format('H:i') === $endTime->format('H:i'));

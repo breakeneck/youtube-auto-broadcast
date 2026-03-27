@@ -6,8 +6,8 @@ class GoogleSheet
     static function getRowsAfterToday($count = 7)
     {
         try {
-            // Extended range to include time (H) and duration (I) columns
-            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:I");
+            // Range A:H - user data structure
+            $rawRows = self::fetchRows($_ENV['SPREADSHEET_ID'], $_ENV['SHEET_ID'], "!A:H");
         } catch (\Exception $e) {
             return [];
         }
@@ -16,7 +16,22 @@ class GoogleSheet
         $lastRows = [];
 
         foreach ($rawRows as $rowArray) {
-            $row = new Row(...$rowArray);
+            // Reorder columns to match Row constructor:
+            // Row: isManualMode, date, dayOfWeek, book, verse, username, theme, time, duration
+            // Sheet: empty, date, time, duration, dayOfWeek, book, verse, username
+            $reordered = [
+                $rowArray[0] ?? null,           // A: isManualMode
+                $rowArray[1] ?? null,           // B: date
+                $rowArray[4] ?? null,           // E: dayOfWeek
+                $rowArray[5] ?? null,           // F: book
+                $rowArray[6] ?? null,           // G: verse
+                $rowArray[7] ?? null,           // H: username
+                null,                            // theme (not in sheet)
+                $rowArray[2] ?? null,           // C: time
+                $rowArray[3] ?? null,           // D: duration
+            ];
+            
+            $row = new Row(...$reordered);
             if ($row->isToday()) {
 //                print_r($row);
                 $n = 1;
