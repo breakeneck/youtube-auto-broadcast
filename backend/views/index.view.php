@@ -1,8 +1,8 @@
 <?php
 /**
-* @var \App\Row[] $lastRows
-* @var \App\Row|null $currentScheduledRow
-*/ ?>
+ * @var \App\Row[] $lastRows
+ * @var \App\Row|null $currentScheduledRow
+ */ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +48,14 @@
     .flex {display: flex;}
     .flex input {flex: 1;}
 </style>
+
+<div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+    <div class="text-muted small">
+        <a href="/editor" class="text-decoration-none">
+            <i class="bi bi-pencil-square"></i> Редактор розкладу
+        </a>
+    </div>
+</div>
 
 <?php if ($state->getAttr('id')):?>
     <br/>

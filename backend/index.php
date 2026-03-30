@@ -29,6 +29,102 @@ app()->get('/', function () use ($state, $currentScheduledRow) {
     ]);
 });
 
+/**
+ * Editor page - Google Sheets-like interface for editing schedule
+ */
+app()->get('/editor', function () {
+    $rows = \App\GoogleSheet::getAllRowsWithRowNumbers();
+    
+    echo app()->template->render('editor', [
+        'rows' => $rows,
+    ]);
+});
+
+/**
+ * API endpoint for updating a single cell
+ * Expects JSON: { "row": int, "col": int, "value": mixed }
+ */
+app()->post('/api/sheet/update-cell', function () {
+    header('Content-Type: application/json');
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($input['row']) || !isset($input['col']) || !isset($input['value'])) {
+        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+        return;
+    }
+    
+    $success = \App\GoogleSheet::updateCell(
+        (int)$input['row'],
+        (int)$input['col'],
+        $input['value']
+    );
+    
+    echo json_encode(['success' => $success]);
+});
+
+/**
+ * API endpoint for inserting a new row after the specified row
+ * Expects JSON: { "afterRow": int, "data": { "date": string, "time": string, ... } }
+ */
+app()->post('/api/sheet/insert-row', function () {
+    header('Content-Type: application/json');
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($input['afterRow']) || !isset($input['data'])) {
+        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+        return;
+    }
+    
+    $rowNumber = \App\GoogleSheet::insertRowAfter(
+        (int)$input['afterRow'],
+        $input['data']
+    );
+    
+    if ($rowNumber) {
+        echo json_encode(['success' => true, 'rowNumber' => $rowNumber]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to insert row']);
+    }
+});
+
+/**
+ * API endpoint for batch updating cells
+ * Expects JSON: { "updates": [{ "row": int, "col": int, "value": mixed }, ...] }
+ */
+app()->post('/api/sheet/batch-update', function () {
+    header('Content-Type: application/json');
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($input['updates']) || !is_array($input['updates'])) {
+        echo json_encode(['success' => false, 'error' => 'Missing updates array']);
+        return;
+    }
+    
+    $success = \App\GoogleSheet::batchUpdateCells($input['updates']);
+    
+    echo json_encode(['success' => $success]);
+});
+
+/**
+ * API endpoint for adding a new row
+ * Expects JSON: { "date": string, "time": string, "duration": string, "book": string, "verse": string, "username": string, "theme": string }
+ */
+app()->post('/api/sheet/append-row', function () {
+    header('Content-Type: application/json');
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    $rowNumber = \App\GoogleSheet::appendRow($input);
+    
+    if ($rowNumber) {
+        echo json_encode(['success' => true, 'rowNumber' => $rowNumber]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to append row']);
+    }
+});
 
 app()->post('/start', function () use ($state) {
 
