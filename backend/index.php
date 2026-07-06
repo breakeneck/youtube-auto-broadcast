@@ -1,77 +1,85 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . "/vendor/autoload.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+// Resolve relative file paths against the project root
+foreach (["YOUTUBE_AUTH_FILE", "SHEETS_CREDENTIALS"] as $key) {
+    if (isset($_ENV[$key]) && !str_starts_with($_ENV[$key], "/")) {
+        $_ENV[$key] = __DIR__ . "/" . $_ENV[$key];
+    }
+}
+
 $state = new \App\SimpleState();
 
-app()->template->config('path', __DIR__ . '/views');
+app()->template->config("path", __DIR__ . "/views");
 
-app()->config(['debug' => $_ENV['APP_DEBUG']]);
+app()->config(["debug" => $_ENV["APP_DEBUG"]]);
 
 // Get current scheduled row if broadcast is running
 $currentScheduledRow = null;
-if ($state->getAttr('id') && $state->getAttr('scheduled_row')) {
-    $scheduledData = $state->getAttr('scheduled_row');
+if ($state->getAttr("id") && $state->getAttr("scheduled_row")) {
+    $scheduledData = $state->getAttr("scheduled_row");
     $currentScheduledRow = new \App\Row(...$scheduledData);
 }
 
-app()->get('/', function () use ($state, $currentScheduledRow) {
+app()->get("/", function () use ($state, $currentScheduledRow) {
     $lastRows = \App\GoogleSheet::getRowsAfterToday();
-//    print_r($lastRows);die;
+    //    print_r($lastRows);die;
 
-    echo app()->template->render('index', [
-        'state' => $state,
-        'lastRows' => $lastRows ?? [],
-        'currentScheduledRow' => $currentScheduledRow,
+    echo app()->template->render("index", [
+        "state" => $state,
+        "lastRows" => $lastRows ?? [],
+        "currentScheduledRow" => $currentScheduledRow,
     ]);
 });
 
-
-app()->post('/start', function () use ($state) {
-
-    if (!$state->getAttr('id') ) {
+app()->post("/start", function () use ($state) {
+    if (!$state->getAttr("id")) {
         $scenario = new App\Scenario();
         $scenario->startObs();
         $scenario->wait(10);
 
         $decor = new \App\Decor($_POST);
-        $broadcastId = $scenario->startBroadcast($decor->getTitle(), $decor->getDescription());
+        $broadcastId = $scenario->startBroadcast(
+            $decor->getTitle(),
+            $decor->getDescription(),
+        );
         $scenario->notify($broadcastId, $decor->getDescription());
 
-        $state->setAttr('id', $broadcastId);
+        $state->setAttr("id", $broadcastId);
     }
 
-    app()->response()->redirect('/');
+    app()->response()->redirect("/");
 });
 
-app()->post('/stop', function () use ($state) {
-    $broadcastId = $state->getAttr('id');
+app()->post("/stop", function () use ($state) {
+    $broadcastId = $state->getAttr("id");
 
     $scenario = new App\Scenario();
     $scenario->finishBroadcast($broadcastId);
     $scenario->stopObs();
 
-    $state->setAttr('id', null);
-    $state->setAttr('scheduled_row', null);
+    $state->setAttr("id", null);
+    $state->setAttr("scheduled_row", null);
 
-    app()->response()->redirect('/');
+    app()->response()->redirect("/");
 });
 
-app()->get('/reset', function () use ($state) {
-    $state->setAttr('id', null);
-    $state->setAttr('scheduled_row', null);
+app()->get("/reset", function () use ($state) {
+    $state->setAttr("id", null);
+    $state->setAttr("scheduled_row", null);
 
-    app()->response()->redirect('/');
+    app()->response()->redirect("/");
 });
 
-app()->get('/exitapps', function () use ($state) {
+app()->get("/exitapps", function () use ($state) {
     $scenario = new App\Scenario();
     $scenario->stopObs();
 
-    app()->response()->redirect('/');
+    app()->response()->redirect("/");
 });
 
 app()->run();
