@@ -21,20 +21,22 @@ class Scenario
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 
-        // чекаємо поки кодер (ffmpeg-cast) почне пушити стрім, інакше goLive впаде з "Stream is inactive"
+        // кодер (ffmpeg-cast) пушить з вебки відразу; якщо стрім не став active за ~90 с —
+        // значить сигналу з камери/ffmpeg немає, не чекаємо довго, а виходимо з помилкою
         $streamId = $_ENV['YOUTUBE_STREAM_ID'];
-        $deadline = time() + 300;
+        $deadline = time() + 90;
         $streamActive = false;
         while (time() < $deadline) {
             if ($this->youtube->getStreamStatus($streamId) === 'active') {
                 $streamActive = true;
                 break;
             }
-            sleep(5);
+            sleep(3);
         }
 
         if (!$streamActive) {
-            $this->notify($broadcastId, 'УВАГА: стрім не став active за 5 хвилин — ефір може не піти в ефир! Перевірте ffmpeg-cast на машині OBS.');
+            $this->notify($broadcastId, 'УВАГА: стрім не став active за 90 с — схоже, немає сигналу з вебки (ffmpeg-cast). Ефір НЕ запущено.');
+            throw new \Exception('Stream not active within 90s');
         }
 
         try {

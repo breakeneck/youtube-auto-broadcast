@@ -37,8 +37,8 @@ app()->get("/", function () use ($state, $currentScheduledRow) {
 });
 
 app()->post("/start", function () use ($state) {
-    // старт може чекати на active стрім до 5 хвилин
-    set_time_limit(400);
+    // старт: ~10 с на старт юніта + до 90 с на active стрім + API-виклики
+    set_time_limit(180);
     if (!$state->getAttr("id") && !(($s = (int)$state->getAttr("starting")) && time() - $s < 600)) {
         $state->setAttr("starting", time());
         try {

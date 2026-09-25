@@ -58,7 +58,7 @@ bash backend/tests/smoke.sh --offline  # без зовнішніх виклик�
 - НЕ стартувати OBS (`obs-start`) — бойовий шлях це ffmpeg-юніт; OBS блокує `/dev/video0`.
 - Смоук-тест нічого не стартує і не шле повідомлень у Telegram — не «допомогти» йому цим.
 - ПОВНИЙ end-to-end тест (реальний ефір на 2 хв) — тільки за явної згоди користувача:
-  `systemctl --user start ffmpeg-cast` на OBS-машині → дочекатись стрім `active` (до 5 хв)
+  `systemctl --user start ffmpeg-cast` на OBS-машині → дочекатись стрім `active` (~10-90 с)
   → createBroadcast/goLive через `App\Scenario` → потім обов'язково `transition('complete')`
   і `systemctl --user stop ffmpeg-cast`. Не робити це без запиту.
 

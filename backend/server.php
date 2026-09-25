@@ -37,7 +37,7 @@ function doStart($state, $row = null)
         return;
     }
 
-    // startBroadcast може чекати на active стрім до 5 хвилин —
+    // startBroadcast може чекати на active стрім до ~90 с —
     // блокуємо повторний старт на час наступних cron-тікків
     $startingAt = (int)$state->getAttr("starting");
     if ($startingAt && time() - $startingAt < 600) {
