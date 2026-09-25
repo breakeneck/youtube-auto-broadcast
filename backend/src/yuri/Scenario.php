@@ -12,12 +12,13 @@ class Scenario
         $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
     }
 
-    public function startBroadcast($title, $description = '', $lengthMinutes = 120)
+    public function startBroadcast($title, $description = '', $lengthMinutes = 120, $privacy = null)
     {
+        $privacy = $privacy ?: $_ENV['YOUTUBE_PRIVACY'];
         $startTime = date('Y-m-d\TH:i:s\Z');
         $endTime = date('Y-m-d\TH:i:s\Z', strtotime("+ $lengthMinutes minutes"));
 
-        $broadcastId = $this->youtube->createBroadcast($title, $description, $startTime, $endTime, $_ENV['YOUTUBE_PRIVACY']);
+        $broadcastId = $this->youtube->createBroadcast($title, $description, $startTime, $endTime, $privacy);
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 

@@ -77,11 +77,7 @@
 <!--    <a href="/resetcam" class="mb-3 d-inline-block">Перезавантажити камеру</a>-->
 <?php endif; ?>
 
-<div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?>
-    <?php if (!$state->getAttr('id')):?>
-        &nbsp;&nbsp;<input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
-    <?php endif;?>
-</div>
+<div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?></div>
 <table class="table table-striped table-hover">
     <?php foreach ($lastRows as $row):?>
     <tr class="<?=$currentScheduledRow && $currentScheduledRow->dateFormatted() === $row->dateFormatted() && $currentScheduledRow->time === $row->time ? 'scheduled-now' : ''?>">
@@ -159,6 +155,9 @@
     </div>
     <div class="flex">
         <input id="title" name="title" type="text">
+        <label style="white-space: nowrap">
+            <input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
+        </label>
         <button type="submit" class="btn btn-primary">
             <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
             Go

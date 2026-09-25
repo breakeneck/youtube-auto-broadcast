@@ -42,6 +42,9 @@ app()->post("/start", function () use ($state) {
     if (!$state->getAttr("id") && !(($s = (int)$state->getAttr("starting")) && time() - $s < 600)) {
         $state->setAttr("starting", time());
         try {
+            // «Don't notify»: анлістед-ефір без Telegram-анонсу
+            $skipNotification = isset($_POST["skip_notification"]);
+
             $scenario = new App\Scenario();
             $scenario->startObs();
             $scenario->wait(10);
@@ -50,8 +53,12 @@ app()->post("/start", function () use ($state) {
             $broadcastId = $scenario->startBroadcast(
                 $decor->getTitle(),
                 $decor->getDescription(),
+                120,
+                $skipNotification ? "unlisted" : $_ENV["YOUTUBE_PRIVACY"],
             );
-            $scenario->notify($broadcastId, $decor->getDescription());
+            if (!$skipNotification) {
+                $scenario->notify($broadcastId, $decor->getDescription());
+            }
 
             $state->setAttr("id", $broadcastId);
         } finally {
