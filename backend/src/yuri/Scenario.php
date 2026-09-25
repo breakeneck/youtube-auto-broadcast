@@ -7,11 +7,9 @@ use phpseclib3\Net\SSH2;
 class Scenario
 {
     private $youtube;
-    public $camera;
     public function __construct()
     {
         $this->youtube = new \App\Youtube($_ENV['YOUTUBE_AUTH_FILE']);
-        $this->camera = new \App\Hikvision($_ENV['HIK_HOST'], $_ENV['HIK_USERNAME'], $_ENV['HIK_PASSWORD']);
     }
 
     public function startBroadcast($title, $description = '', $lengthMinutes = 120)
@@ -23,14 +21,31 @@ class Scenario
 
         $this->youtube->bindToStream($broadcastId, $_ENV['YOUTUBE_STREAM_ID']);
 
+        // чекаємо поки кодер (ffmpeg-cast) почне пушити стрім, інакше goLive впаде з "Stream is inactive"
+        $streamId = $_ENV['YOUTUBE_STREAM_ID'];
+        $deadline = time() + 300;
+        $streamActive = false;
+        while (time() < $deadline) {
+            if ($this->youtube->getStreamStatus($streamId) === 'active') {
+                $streamActive = true;
+                break;
+            }
+            sleep(5);
+        }
+
+        if (!$streamActive) {
+            $this->notify($broadcastId, 'УВАГА: стрім не став active за 5 хвилин — ефір може не піти в ефир! Перевірте ffmpeg-cast на машині OBS.');
+        }
+
         try {
             $this->youtube->goLive($broadcastId);
         }
         catch (\Exception $e) {
-            var_dump($e->getMessage());
-//            if ($e->getMessage() === 'Stream is inactive') {
-//
-//            }
+            // «Redundant transition» означає що ефір уже live — це успіх
+            if (!str_contains($e->getMessage(), 'Redundant transition')) {
+                $this->notify($broadcastId, 'УВАГА: goLive не вдався: ' . $e->getMessage());
+                throw $e;
+            }
         }
 
         return $broadcastId;
@@ -38,7 +53,22 @@ class Scenario
 
     public function finishBroadcast($broadcastId)
     {
-        $this->youtube->finish($broadcastId);
+        $lifeCycle = $this->youtube->getBroadcastLifeCycle($broadcastId);
+
+        // ефір який так і не вийшов в ефир (created/ready) — завершувати transition('complete') не можна (403)
+        if (!in_array($lifeCycle, ['live', 'started', 'liveStarting'], true)) {
+            return;
+        }
+
+        try {
+            $this->youtube->finish($broadcastId);
+        }
+        catch (\Exception $e) {
+            // «Redundant transition» — уже завершений, це успіх
+            if (!str_contains($e->getMessage(), 'Redundant transition')) {
+                throw $e;
+            }
+        }
     }
 
     public function notify($broadcastId, $title, $description = '')
@@ -61,24 +91,14 @@ class Scenario
     public function startObs()
     {
         $ssh = $this->loginSSH();
-//        $ssh->exec('DISPLAY=:0 nohup vlcout &');
-        $ssh->exec('systemctl --user start vlc');
-        $ssh->exec('systemctl --user start obs-start');
+        // ffmpeg push з /dev/video0 прямо в YouTube (надійний шлях, OBS headless ламається)
+        $ssh->exec('systemctl --user start ffmpeg-cast');
     }
 
     public function stopObs()
     {
         $ssh = $this->loginSSH();
-//        $ssh->exec('vlckill');
-        $ssh->exec('systemctl --user stop vlc');
-        $ssh->exec('systemctl --user start obs-stop');
-    }
-
-
-    public function restartCamera()
-    {
-        $ssh = $this->loginSSH();
-        $ssh->exec('systemctl --user restart vlc');
+        $ssh->exec('systemctl --user stop ffmpeg-cast');
     }
 
 

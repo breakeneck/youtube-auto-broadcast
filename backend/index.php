@@ -37,19 +37,26 @@ app()->get("/", function () use ($state, $currentScheduledRow) {
 });
 
 app()->post("/start", function () use ($state) {
-    if (!$state->getAttr("id")) {
-        $scenario = new App\Scenario();
-        $scenario->startObs();
-        $scenario->wait(10);
+    // старт може чекати на active стрім до 5 хвилин
+    set_time_limit(400);
+    if (!$state->getAttr("id") && !(($s = (int)$state->getAttr("starting")) && time() - $s < 600)) {
+        $state->setAttr("starting", time());
+        try {
+            $scenario = new App\Scenario();
+            $scenario->startObs();
+            $scenario->wait(10);
 
-        $decor = new \App\Decor($_POST);
-        $broadcastId = $scenario->startBroadcast(
-            $decor->getTitle(),
-            $decor->getDescription(),
-        );
-        $scenario->notify($broadcastId, $decor->getDescription());
+            $decor = new \App\Decor($_POST);
+            $broadcastId = $scenario->startBroadcast(
+                $decor->getTitle(),
+                $decor->getDescription(),
+            );
+            $scenario->notify($broadcastId, $decor->getDescription());
 
-        $state->setAttr("id", $broadcastId);
+            $state->setAttr("id", $broadcastId);
+        } finally {
+            $state->setAttr("starting", null);
+        }
     }
 
     app()->response()->redirect("/");

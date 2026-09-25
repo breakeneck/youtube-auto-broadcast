@@ -108,6 +108,36 @@ class Youtube {
         }
     }
 
+    /**
+     * Повертає статус потоку: 'inactive' | 'active' | 'error'
+     */
+    public function getStreamStatus($streamId): string
+    {
+        $response = $this->service->liveStreams->listLiveStreams('status', ['id' => $streamId]);
+        $items = $response->getItems();
+        if (empty($items)) {
+            return 'unknown';
+        }
+        /** @var \Google\Service\YouTube\LiveStream $item */
+        $item = $items[0];
+        return $item->getStatus()->streamStatus;
+    }
+
+    /**
+     * Повертає lifeCycleStage мовлення: 'created' | 'ready' | 'liveStarting' | 'live' | 'complete' | ...
+     */
+    public function getBroadcastLifeCycle($broadcastId): string
+    {
+        $response = $this->service->liveBroadcasts->listLiveBroadcasts('id,status', ['id' => $broadcastId]);
+        $items = $response->getItems();
+        if (empty($items)) {
+            return 'unknown';
+        }
+        /** @var \Google\Service\YouTube\LiveBroadcast $item */
+        $item = $items[0];
+        return $item->getStatus()->getLifeCycleStatus();
+    }
+
     public function listStreams()
     {
         $response = $this->service->liveStreams->listLiveStreams('cdn,status', ['mine' => true]);

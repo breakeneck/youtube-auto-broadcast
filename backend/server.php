@@ -37,52 +37,65 @@ function doStart($state, $row = null)
         return;
     }
 
-    if (!$row) {
-        $row = \App\GoogleSheet::getTodaysRow();
-    }
-
-    $decor = new \App\Decor($row);
-    echo date("Y-m-d H:i:s") .
-        " START: " .
-        ($decor->row->isManualMode ? "MANUAL_MODE" : $decor->getTitle()) .
-        "\n";
-
-    if ($decor->row->isManualMode) {
+    // startBroadcast може чекати на active стрім до 5 хвилин —
+    // блокуємо повторний старт на час наступних cron-тікків
+    $startingAt = (int)$state->getAttr("starting");
+    if ($startingAt && time() - $startingAt < 600) {
+        echo date("Y-m-d H:i:s") . " START: start already in progress, skipping\n";
         return;
     }
+    $state->setAttr("starting", time());
 
-    $scenario = new App\Scenario();
-    $scenario->startObs();
-    $scenario->wait(10);
+    try {
+        if (!$row) {
+            $row = \App\GoogleSheet::getTodaysRow();
+        }
 
-    $duration = $decor->row->duration ?: 120; // Default 120 minutes if not specified
-    $broadcastId = $scenario->startBroadcast(
-        $decor->getTitle(),
-        $decor->getDescription(),
-        $duration,
-    );
-    $scenario->notify(
-        $broadcastId,
-        $decor->getTitle(),
-        $decor->getDescription(),
-    );
+        $decor = new \App\Decor($row);
+        echo date("Y-m-d H:i:s") .
+            " START: " .
+            ($decor->row->isManualMode ? "MANUAL_MODE" : $decor->getTitle()) .
+            "\n";
 
-    $state->setAttr("id", $broadcastId);
+        if ($decor->row->isManualMode) {
+            return;
+        }
 
-    // Store scheduled row data for stop logic
-    if ($decor->row->time && $decor->row->duration) {
-        $scheduledData = [
-            $decor->row->isManualMode,
-            $decor->row->date ? $decor->row->date->format("d.m.Y") : null,
-            null, // dayOfWeek
-            $decor->row->book,
-            $decor->row->verse,
-            $decor->row->username,
-            $decor->row->theme,
-            $decor->row->time,
-            $decor->row->duration,
-        ];
-        $state->setAttr("scheduled_row", $scheduledData);
+        $scenario = new App\Scenario();
+        $scenario->startObs();
+        $scenario->wait(10);
+
+        $duration = $decor->row->duration ?: 120; // Default 120 minutes if not specified
+        $broadcastId = $scenario->startBroadcast(
+            $decor->getTitle(),
+            $decor->getDescription(),
+            $duration,
+        );
+        $scenario->notify(
+            $broadcastId,
+            $decor->getTitle(),
+            $decor->getDescription(),
+        );
+
+        $state->setAttr("id", $broadcastId);
+
+        // Store scheduled row data for stop logic
+        if ($decor->row->time && $decor->row->duration) {
+            $scheduledData = [
+                $decor->row->isManualMode,
+                $decor->row->date ? $decor->row->date->format("d.m.Y") : null,
+                null, // dayOfWeek
+                $decor->row->book,
+                $decor->row->verse,
+                $decor->row->username,
+                $decor->row->theme,
+                $decor->row->time,
+                $decor->row->duration,
+            ];
+            $state->setAttr("scheduled_row", $scheduledData);
+        }
+    } finally {
+        $state->setAttr("starting", null);
     }
 }
 
@@ -106,6 +119,11 @@ function doCheckSchedule($state)
 
     // Check if we should start a new broadcast
     if (!$state->getAttr("id")) {
+        $startingAt = (int)$state->getAttr("starting");
+        if ($startingAt && time() - $startingAt < 600) {
+            echo date("Y-m-d H:i:s") . " CHECK: start already in progress, waiting\n";
+            return;
+        }
         $row = \App\GoogleSheet::getRowScheduledToStartNow();
         if ($row) {
             $decor = new \App\Decor($row);
