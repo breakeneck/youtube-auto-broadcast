@@ -2,12 +2,13 @@
 /**
 * @var \App\Row[] $lastRows
 * @var \App\Row|null $currentScheduledRow
+* @var bool $isAdmin
+* @var string $castBackend
 */ ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script
             src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
@@ -18,7 +19,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>ІССКОН Луцьк: пряма трансляція</title>
 
-
     <link rel="apple-touch-icon" sizes="180x180" href="/ico/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/ico/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon-16x16.png">
@@ -26,146 +26,226 @@
     <link rel="mask-icon" href="/ico/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
+
+    <style>
+        body { background: #f5f6f8; }
+        .app-container { max-width: 720px; }
+
+        .live-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #dc3545; display: inline-block;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: .35; transform: scale(.8); }
+        }
+
+        .row-scheduled-now {
+            background: #fff8e6;
+            border-left: 4px solid #ffc107 !important;
+        }
+
+        .schedule-meta { font-size: .82rem; color: #6c757d; }
+
+        /* великі зручні кнопки на телефоні */
+        @media (max-width: 575.98px) {
+            .btn { padding-top: .5rem; padding-bottom: .5rem; }
+            .schedule-actions .btn { min-width: 110px; }
+        }
+    </style>
 </head>
 <body>
+<div class="app-container container px-3 py-4">
 
-<style>
-    @media (max-width: 600px) {
-        body {width: 360px;}
-    }
-    @media (min-width: 601px) {
-        body {width: 500px;}
-    }
-    body {margin: 0 auto;}
-    /*table, th, td {*/
-    /*    border: 1px solid black;*/
-    /*    border-collapse: collapse;*/
-    /*}*/
-    td {padding: 5px 10px;}
-    /*input {width: 100%;}*/
-    /*.btn-primary {float: right;}*/
-    /*.spinner-border {display: none;}*/
-    .flex {display: flex;}
-    .flex input {flex: 1;}
-</style>
+    <!-- Шапка -->
+    <header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h4 mb-0">
+                <i class="bi bi-broadcast-pin text-primary"></i>
+                ІССКОН Луцьк
+            </h1>
+            <div class="text-muted small">Пряма трансляція</div>
+        </div>
+        <div class="text-md-end">
+            <div class="fw-semibold"><?= \App\Utils::getLocalTimeStr('now', 'EEEE')?></div>
+            <div class="text-muted small"><?= \App\Utils::getLocalTimeStr('now', 'dd.MM.Y · HH:mm')?></div>
+        </div>
+    </header>
 
-<?php if ($state->getAttr('id')):?>
-    <br/>
-    <div class="broadcast-active p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="bi bi-broadcast"></i> 
-                <strong>Трансляція запущена</strong>
+    <!-- Активна трансляція -->
+    <?php if ($state->getAttr('id')):?>
+        <div class="card border-danger mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="live-dot"></span>
+                    <span class="fw-bold text-danger">Трансляція запущена</span>
+                </div>
                 <?php if ($currentScheduledRow):?>
-                    <br><small><?=(new \App\Decor($currentScheduledRow))->getTitle()?></small>
+                    <div class="text-muted mb-3"><?=htmlspecialchars((new \App\Decor($currentScheduledRow))->getTitle())?></div>
+                <?php else:?>
+                    <div class="mb-3"></div>
                 <?php endif;?>
-            </div>
-            <div>
-                <a class="icon-link" href="https://www.youtube.com/watch?v=<?=$state->getAttr('id')?>">
-                    <i class="bi bi-youtube"></i>
-                    Youtube
-                </a>
+                <div class="d-grid d-sm-flex gap-2">
+                    <a class="btn btn-outline-dark" target="_blank" rel="noopener"
+                       href="https://www.youtube.com/watch?v=<?=$state->getAttr('id')?>">
+                        <i class="bi bi-youtube"></i> Дивитись на YouTube
+                    </a>
+                    <?php if ($isAdmin):?>
+                        <form method="post" action="/stop" class="flex-sm-grow-1">
+                            <button type="submit" class="btn btn-danger w-100">
+                                <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                                <i class="bi bi-stop-circle"></i> Зупинити трансляцію
+                            </button>
+                        </form>
+                    <?php endif;?>
+                </div>
             </div>
         </div>
-        <form method="post" action="/stop" class="mt-2">
-            <button type="submit" class="btn btn-danger btn-sm">
-                <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-                Зупинити трансляцію
-            </button>
-        </form>
-    </div>
-<!--    <a href="/resetcam" class="mb-3 d-inline-block">Перезавантажити камеру</a>-->
-<?php endif; ?>
+    <?php endif; ?>
 
-<div>Сьогодні <?= \App\Utils::getLocalTimeStr('now', 'EEEE dd.MM.Y')?></div>
-<table class="table table-striped table-hover">
-    <?php foreach ($lastRows as $row):?>
-    <tr class="<?=$currentScheduledRow && $currentScheduledRow->dateFormatted() === $row->dateFormatted() && $currentScheduledRow->time === $row->time ? 'scheduled-now' : ''?>">
-        <?php if (!$row->username && !$row->theme) continue ?>
-        <td>
-            <?php if ($row->time):?>
-                <strong><?=$row->dayOfWeek()?> <?=$row->time?></strong>
-            <?php else:?>
-                <?=$row->dateTableFormat()?>
-            <?php endif;?>
-        </td>
-        <?php if ($row->book && $row->verse):?>
-        <td>
-            <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>">
-                <?=$row->book .' ' . $row->verse?>
-            </a>
-        </td>
-        <?php endif;?>
-        <td><?=$row->username?><?php if ($row->theme):?> — <?=$row->theme?><?php endif;?></td>
-        <?php if ($row->isValid()):?>
-            <td>
-                <?php 
-                // Check if this row is currently scheduled to run
+    <!-- Розклад -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">
+            <i class="bi bi-calendar-week text-primary"></i> Розклад
+        </div>
+        <div class="list-group list-group-flush">
+            <?php foreach ($lastRows as $row):?>
+                <?php if (!$row->username && !$row->theme) continue ?>
+                <?php
                 $isScheduledNow = $row->isScheduledNow();
-                $isCurrentlyRunning = $currentScheduledRow && 
-                    $currentScheduledRow->dateFormatted() === $row->dateFormatted() && 
+                $isCurrentlyRunning = $currentScheduledRow &&
+                    $currentScheduledRow->dateFormatted() === $row->dateFormatted() &&
                     $currentScheduledRow->time === $row->time;
                 ?>
-                
-                <?php if ($isCurrentlyRunning):?>
-                    <button type="button" class="btn btn-warning btn-sm" disabled>
-                        <i class="bi bi-broadcast"></i> Зараз
-                    </button>
-                <?php elseif ($isScheduledNow && !$state->getAttr('id')):?>
-                    <button type="button" class="go btn btn-success"
-                            data-username="<?=$row->username?>"
-                            data-verse="<?=$row->verse?>"
-                            data-book="<?=$row->book?>"
-                    >
-                        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-                        <i class="bi bi-play-fill"></i> Старт
-                    </button>
-                <?php elseif ($row->time && !$state->getAttr('id')):?>
-                    <?php /* time already shown in first column */ ?>
-                <?php elseif (!$state->getAttr('id')):?>
-                    <button type="button" class="go btn btn-outline-success btn-sm"
-                            data-username="<?=$row->username?>"
-                            data-verse="<?=$row->verse?>"
-                            data-book="<?=$row->book?>"
-                    >
-                        Go
-                    </button>
-                <?php endif;?>
-            </td>
-        <?php endif ?>
-        <?php if ($row->duration):?>
-            <td><small class="text-muted"><?=$row->duration?> хв</small></td>
+                <div class="list-group-item <?=($isCurrentlyRunning || ($isScheduledNow && !$state->getAttr('id'))) ? 'row-scheduled-now' : ''?>">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="flex-grow-1" style="min-width: 0">
+                            <div class="fw-semibold">
+                                <?php if ($row->time):?>
+                                    <i class="bi bi-clock text-muted"></i>
+                                    <?=$row->dayOfWeek()?> <?=$row->time?>
+                                <?php else:?>
+                                    <i class="bi bi-calendar-day text-muted"></i>
+                                    <?=$row->dateTableFormat()?>
+                                <?php endif;?>
+                                <?php if ($row->duration):?>
+                                    <span class="badge text-bg-secondary ms-1"><?=$row->duration?> хв</span>
+                                <?php endif;?>
+                            </div>
+                            <div class="schedule-meta text-truncate">
+                                <?php if ($row->book && $row->verse):?>
+                                    <a href="<?=(new \App\Decor($row))->getVedabaseUrl()?>" target="_blank" rel="noopener"
+                                       class="text-decoration-none">
+                                        <i class="bi bi-book"></i> <?=$row->book .' '. $row->verse?>
+                                    </a>
+                                    <?php if ($row->username || $row->theme):?><span class="mx-1">·</span><?php endif;?>
+                                <?php endif;?>
+                                <?php if ($row->username):?><?=htmlspecialchars($row->username)?><?php endif;?>
+                                <?php if ($row->theme):?><?php if ($row->username):?> — <?php endif;?><?=htmlspecialchars($row->theme)?><?php endif;?>
+                            </div>
+                        </div>
+                        <?php if ($isAdmin && $row->isValid()):?>
+                            <div class="schedule-actions">
+                                <?php if ($isCurrentlyRunning):?>
+                                    <button type="button" class="btn btn-warning btn-sm" disabled>
+                                        <i class="bi bi-broadcast"></i> Зараз
+                                    </button>
+                                <?php elseif ($isScheduledNow && !$state->getAttr('id')):?>
+                                    <button type="button" class="go btn btn-success"
+                                            data-username="<?=$row->username?>"
+                                            data-verse="<?=$row->verse?>"
+                                            data-book="<?=$row->book?>"
+                                    >
+                                        <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                                        <i class="bi bi-play-fill"></i> Старт
+                                    </button>
+                                <?php elseif ($row->time && !$state->getAttr('id')):?>
+                                    <?php /* час уже показаний у лівій колонці */ ?>
+                                <?php elseif (!$state->getAttr('id')):?>
+                                    <button type="button" class="go btn btn-outline-success btn-sm"
+                                            data-username="<?=$row->username?>"
+                                            data-verse="<?=$row->verse?>"
+                                            data-book="<?=$row->book?>"
+                                    >
+                                        <i class="bi bi-play-fill"></i> Go
+                                    </button>
+                                <?php endif;?>
+                            </div>
+                        <?php endif ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Ручний запуск (лише адмін) -->
+    <?php if ($isAdmin && !$state->getAttr('id')):?>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-magic text-primary"></i> Запустити вручну
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+                    <i class="bi bi-camera-reels text-primary"></i>
+                    <label for="castBackend" class="form-label mb-0 fw-semibold">Бекенд трансляції</label>
+                    <select id="castBackend" class="form-select form-select-sm w-auto ms-auto">
+                        <option value="obs" <?=($castBackend === 'obs') ? 'selected' : ''?>>OBS (основний)</option>
+                        <option value="ffmpeg" <?=($castBackend === 'ffmpeg') ? 'selected' : ''?>>ffmpeg (fallback)</option>
+                    </select>
+                </div>
+                <form id="form" method="post" action="/start">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Назва ефіру <span class="text-muted small">(якщо вказана — решту полів не треба)</span></label>
+                        <input id="title" name="title" type="text" class="form-control" placeholder="Напр.: Харі-катха">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label for="book" class="form-label">Книга</label>
+                            <select id="book" name="book" class="form-select">
+                                <option>---</option>
+                                <?php foreach (\App\Decor::booksDropDown() as $book):?>
+                                    <option value="<?=$book?>"><?=$book?></option>
+                                <?php endforeach;?>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="verse" class="form-label">Вірш</label>
+                            <input id="verse" name="verse" class="form-control" placeholder="1.1">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="username" class="form-label">Лектор</label>
+                            <input id="username" name="username" class="form-control" placeholder="Ім'я">
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" name="skip_notification" value="1" id="skipNotification">
+                            <label class="form-check-label" for="skipNotification">
+                                Don't notify <span class="text-muted small">(анлістед, без анонсу в Telegram)</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
+                            <i class="bi bi-play-fill"></i> Запустити
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <footer class="text-center text-muted small pb-3">
+        <i class="bi bi-geo-alt"></i> ISKCON Луцьк · час — локальний (Europe/Kiev)
+        <?php if ($isAdmin):?>
+            · <span class="badge text-bg-primary"><i class="bi bi-person-gear"></i> адмін</span>
+            <a href="/logout" class="text-decoration-none">Вийти</a>
+        <?php else:?>
+            · <a href="/login" class="text-muted text-decoration-none"><i class="bi bi-lock-fill"></i> Вхід адміністратора</a>
         <?php endif;?>
-    </tr>
-    <?php endforeach; ?>
-</table>
+    </footer>
+</div>
 
-<?php if (!$state->getAttr('id')):?>
-    <form id="form" method="post" action="/start">
-    <br/>
-    <div class="flex">
-        <select id="book" name="book" placeholder="Book">
-            <option>---</option>
-            <?php foreach (\App\Decor::booksDropDown() as $book):?>
-            <option value="<?=$book?>"> <?=$book?> </option>
-            <?php endforeach;?>
-        </select>
-        <input id="verse" name="verse" placeholder="Verse" style="min-width: 80px; flex-grow: 0">
-        <input id="username" name="username" placeholder="Username" style="flex-grow: 1">
-    </div>
-    <div class="flex">
-        <input id="title" name="title" type="text">
-        <label style="white-space: nowrap">
-            <input type="checkbox" name="skip_notification" value="1"/>&nbsp;Don't notify
-        </label>
-        <button type="submit" class="btn btn-primary">
-            <span class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-            Go
-        </button>
-    </div>
-</form>
-
-<?php endif; ?>
 <script type="text/javascript">
     $(document).on('click', '.go', function () {
         $('#username').val($(this).attr('data-username'));
@@ -179,6 +259,37 @@
         $('.spinner-border').removeClass('visually-hidden');
         return true;
     })
+
+    function showToast(text, danger) {
+        const el = document.getElementById('liveToast');
+        el.querySelector('.toast-body').innerHTML =
+            '<i class="bi ' + (danger ? 'bi-exclamation-triangle text-danger' : 'bi-check-circle text-success') + '"></i> ' + text;
+        bootstrap.Toast.getOrCreateInstance(el, {delay: 2500}).show();
+    }
+
+    $('#castBackend').on('change', function () {
+        const b = $(this).val();
+        fetch('/backend', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'backend=' + encodeURIComponent(b)
+        }).then(r => r.json()).then(d => {
+            if (d.ok) {
+                showToast('Збережено: бекенд ' + (d.backend === 'obs' ? 'OBS' : 'ffmpeg (fallback)'));
+            } else {
+                showToast('Не вдалось зберегти налаштування', true);
+            }
+        }).catch(() => showToast('Не вдалось зберегти налаштування', true));
+    });
 </script>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+    <div id="liveToast" class="toast align-items-center border-0" role="status">
+        <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -55,6 +55,7 @@ $required = [
     'OBS_HOST', 'OBS_PORT', 'OBS_USERNAME', 'OBS_PASSWORD',
     'TG_API_TOKEN', 'TG_CHAT_ID',
     'SHEETS_CREDENTIALS', 'SPREADSHEET_ID', 'SHEET_ID',
+    'ADMIN_USER', 'ADMIN_PASSWORD_HASH',
 ];
 $missing = [];
 foreach ($required as $key) {
@@ -186,7 +187,14 @@ if (!$OFFLINE) {
 
         $active = $exec('systemctl --user is-active ffmpeg-cast 2>&1');
         $broadcastRunning = !empty($state['id']);
-        if ($active === 'inactive' && !$broadcastRunning) {
+        $castBackend = $state['cast_backend'] ?? 'ffmpeg';
+        if ($broadcastRunning && $castBackend === 'obs') {
+            if ($active === 'active') {
+                wrn('ffmpeg-cast active під час OBS-ефіру — подвійний пуш у стрім!');
+            } else {
+                ok('ffmpeg-cast зупинений (бекенд OBS — так і має бути)');
+            }
+        } elseif ($active === 'inactive' && !$broadcastRunning) {
             ok('ffmpeg-cast зупинений (ефіру немає — так і має бути)');
         } elseif ($active === 'failed' && !$broadcastRunning) {
             // ffmpeg після SIGTERM виходить з кодом 255 -> systemd мітить 'failed'; наступний start це ігнорує
@@ -199,18 +207,23 @@ if (!$OFFLINE) {
             wrn('ffmpeg-cast status: ' . mb_substr($active, 0, 40));
         }
 
-        // OBS має бути зупинений — інакше тримає /dev/video0 і ffmpeg не стартує
+        // OBS: активний — це норма лише коли обрано OBS-бекенд ідефір іде
         $obsProc = $exec('pgrep -x obs6 2>/dev/null; pgrep -x obs 2>/dev/null');
-        if ($obsProc === '') {
-            ok('OBS не запущений (/dev/video0 вільний)');
-        } else {
-            bad('OBS запущений і блокує /dev/video0 — ffmpeg-ефір не зможе стартувати!');
-        }
         $obsStart = $exec('systemctl --user is-active obs-start 2>&1');
-        if ($obsStart !== 'active') {
-            ok('юніт obs-start не активний');
+        if ($broadcastRunning && $castBackend === 'obs') {
+            $obsProc !== '' ? ok('OBS запущений (бекенд OBS — ок)') : bad('бекенд OBS і ефір іде, але OBS не запущений!');
+            $obsStart === 'active' ? ok('obs-start активний — ок для OBS-бекенда') : wrn("obs-start: $obsStart (OBS міг бути запущений вручну)");
         } else {
-            bad('obs-start активний — конфліктує з ffmpeg-cast');
+            $obsProc === '' ? ok('OBS не запущений (/dev/video0 вільний)') : wrn('OBS запущений — тримає /dev/video0, ffmpeg-бекенд не стартує (зупинити: systemctl --user stop obs-start)');
+            $obsStart !== 'active' ? ok('юніт obs-start не активний') : wrn('obs-start активний без ефіру — заблокує ffmpeg-бекенд');
+        }
+
+        // готовність OBS-бекенда
+        if ($castBackend === 'obs') {
+            $obsUnit = $exec('systemctl --user cat obs-start 2>&1');
+            str_contains($obsUnit, 'ExecStart') ? ok('юніт obs-start.service існує') : bad('юніт obs-start.service НЕ знайдено — OBS-бекенд не стартує!');
+            $obsKeyCount = (int)$exec('grep -l "^streamKey=..*" ~/.config/obs-studio/basic/profiles/*/*.ini 2>/dev/null | wc -l');
+            $obsKeyCount > 0 ? ok('у OBS-профілі прописано streamKey (значення не виведено)') : bad('у OBS-профілі немає streamKey — --startstreaming не запрацює!');
         }
 
         $dev = $exec('[ -e /dev/video0 ] && echo yes || echo no');
@@ -250,6 +263,16 @@ if (!$OFFLINE) {
                 } else {
                     bad('ВАЖЛИВО: stream key у ffmpeg-cast.service НЕ збігається з YouTube — ключ міг бути скинутий! (значення не виведено)');
                 }
+                if ($castBackend === 'obs' && $apiKey !== null) {
+                    $obsKey = $exec('grep -h "^streamKey=..*" ~/.config/obs-studio/basic/profiles/*/*.ini 2>/dev/null | head -1 | cut -d= -f2-');
+                    if ($obsKey === '') {
+                        wrn('не вдалось прочитати streamKey з OBS-профілю');
+                    } elseif ($obsKey === $apiKey) {
+                        ok('stream key в OBS-профілі збігається з YouTube (значення не виведено)');
+                    } else {
+                        bad('stream key в OBS-профілі НЕ збігається з YouTube (значення не виведено)');
+                    }
+                }
             } catch (\Throwable $e) {
                 wrn('не вдалося перевірити ключ через API: ' . mb_substr($e->getMessage(), 0, 120));
             }
@@ -261,7 +284,43 @@ if (!$OFFLINE) {
     sec('OBS-машина (пропущено: --offline)');
 }
 
-// ---------------------------------------------------------------- 8. Telegram
+// ---------------------------------------------------------------- 8. Web (авторизація)
+sec('Web (авторизація)');
+if (!$OFFLINE) {
+    $ctx = stream_context_create([
+        'http' => ['ignore_errors' => true, 'timeout' => 5],
+        'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
+    ]);
+    $httpStatus = function (string $method, string $path) use ($ctx): int {
+        $body = $method === 'POST' ? http_build_query(['x' => 1]) : null;
+        $opts = $ctx;
+        if ($method === 'POST') {
+            $extra = http_build_query(['x' => 1]);
+            $opts = stream_context_create([
+                'http' => ['method' => 'POST', 'header' => "Content-Type: application/x-www-form-urlencoded\r\nContent-Length: " . strlen($extra) . "\r\n", 'content' => $extra, 'ignore_errors' => true, 'timeout' => 5],
+                'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
+            ]);
+        }
+        @file_get_contents("https://127.0.0.1$path", false, $opts);
+        foreach ($http_response_header ?? [] as $h) {
+            if (preg_match('#^HTTP/\S+ (\d{3})#', $h, $m)) {
+                return (int)$m[1];
+            }
+        }
+        return 0;
+    };
+
+    $s = $httpStatus('GET', '/login');
+    $s === 200 ? ok('сторінка /login доступна (200)') : bad("/login відповів $s (очікувалось 200)");
+    $s = $httpStatus('POST', '/start');
+    $s === 403 ? ok('POST /start без входу → 403 (захист працює)') : bad("POST /start без входу відповів $s (очікувалось 403) — захист НЕ працює!");
+    $s = $httpStatus('POST', '/stop');
+    $s === 403 ? ok('POST /stop без входу → 403') : bad("POST /stop без входу відповів $s (очікувалось 403)");
+} else {
+    sec('Web (авторизація) (пропущено: --offline)');
+}
+
+// ---------------------------------------------------------------- 9. Telegram
 sec('Telegram');
 if (!empty($_ENV['TG_API_TOKEN']) && !empty($_ENV['TG_CHAT_ID'])) {
     ok('Telegram налаштований (повідомлення навмисно не надсилаються)');

@@ -91,16 +91,23 @@ class Scenario
 //        sleep($minutes * 60);
 //    }
 
-    public function startObs()
+    public function startObs($backend = 'ffmpeg')
     {
         $ssh = $this->loginSSH();
-        // ffmpeg push з /dev/video0 прямо в YouTube (надійний шлях, OBS headless ламається)
-        $ssh->exec('systemctl --user start ffmpeg-cast');
+        if ($backend === 'obs') {
+            // OBS сам пушить у YouTube (--startstreaming); у ньому сцени з фільтрами (поворот, шумозаглушення)
+            $ssh->exec('systemctl --user start obs-start');
+        } else {
+            // ffmpeg push з /dev/video0 прямо в YouTube (fallback: без фільтрів, простіший і надійніший)
+            $ssh->exec('systemctl --user start ffmpeg-cast');
+        }
     }
 
     public function stopObs()
     {
         $ssh = $this->loginSSH();
+        // зупиняємо обидва юніти — той, що був обраний на старті; зупинка неактивного — no-op
+        $ssh->exec('systemctl --user stop obs-start; pkill -x obs6 2>/dev/null; pkill -x obs 2>/dev/null; true');
         $ssh->exec('systemctl --user stop ffmpeg-cast');
     }
 

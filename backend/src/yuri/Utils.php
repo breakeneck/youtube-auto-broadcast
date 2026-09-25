@@ -37,8 +37,28 @@ class Utils
     {
         $date = $date instanceof \DateTime ? $date->format('Y-m-d') : $date;
         $dateTimeObj = new \DateTime($date, new \DateTimeZone('Europe/Kiev'));
-        return \IntlDateFormatter::formatObject($dateTimeObj, $format, 'uk');
+        $str = \IntlDateFormatter::formatObject($dateTimeObj, $format, 'uk');
+
+        // ICU в контейнері не має даних 'uk' і віддає англійську — перекладаємо самі
+        // (strtr замінює довші ключі першими, тож повні назви не чіпаються скороченими)
+        return strtr((string)$str, self::$uaDateWords);
     }
+
+    private static array $uaDateWords = [
+        // дні тижня (EEEE)
+        'Monday' => 'понеділок', 'Tuesday' => 'вівторок', 'Wednesday' => 'середа',
+        'Thursday' => 'четвер', 'Friday' => 'п\'ятниця', 'Saturday' => 'субота', 'Sunday' => 'неділя',
+        // дні тижня скорочено (EEEEEE)
+        'Mon' => 'пн', 'Tue' => 'вт', 'Wed' => 'ср', 'Thu' => 'чт', 'Fri' => 'пт', 'Sat' => 'сб', 'Sun' => 'нд',
+        'Mo' => 'пн', 'Tu' => 'вт', 'We' => 'ср', 'Th' => 'чт', 'Fr' => 'пт', 'Sa' => 'сб', 'Su' => 'нд',
+        // місяці (MMMM) — родовий відмінок, як в датах
+        'January' => 'січня', 'February' => 'лютого', 'March' => 'березня', 'April' => 'квітня',
+        'May' => 'травня', 'June' => 'червня', 'July' => 'липня', 'August' => 'серпня',
+        'September' => 'вересня', 'October' => 'жовтня', 'November' => 'листопада', 'December' => 'грудня',
+        // місяці скорочено (MMM)
+        'Jan' => 'січ', 'Feb' => 'лют', 'Mar' => 'бер', 'Apr' => 'кві', 'Jun' => 'чер', 'Jul' => 'лип',
+        'Aug' => 'сер', 'Sep' => 'вер', 'Oct' => 'жов', 'Nov' => 'лис', 'Dec' => 'гру',
+    ];
 
 
     static function getYoutubeDescription($book, $verse)

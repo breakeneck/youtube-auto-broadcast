@@ -62,7 +62,7 @@ function doStart($state, $row = null)
         }
 
         $scenario = new App\Scenario();
-        $scenario->startObs();
+        $scenario->startObs($state->getAttr("cast_backend") ?: "ffmpeg");
         $scenario->wait(10);
 
         $duration = $decor->row->duration ?: 120; // Default 120 minutes if not specified
